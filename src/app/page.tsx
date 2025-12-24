@@ -11,52 +11,11 @@ import {
   Building2,
   Calendar,
 } from 'lucide-react'
-import {
-  LineChart,
-  Line,
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  Legend,
-  ResponsiveContainer,
-  PieChart,
-  Pie,
-  Cell,
-} from 'recharts'
 import { formatCurrency } from '@/utils/helpers'
-
-// Mock data - Will be replaced with real API calls
-const mockWeeklyData = [
-  { week: 'Week 1', revenue: 5000, salaries: 3000, profit: 2000, orders: 450 },
-  { week: 'Week 2', revenue: 5500, salaries: 3200, profit: 2300, orders: 480 },
-  { week: 'Week 3', revenue: 6000, salaries: 3400, profit: 2600, orders: 520 },
-  { week: 'Week 4', revenue: 6500, salaries: 3600, profit: 2900, orders: 550 },
-]
-
-const mockDriverPerformance = [
-  { name: 'Ahmed Ali', orders: 120, revenue: 1200 },
-  { name: 'Mohamed Hassan', orders: 115, revenue: 1150 },
-  { name: 'Khaled Ibrahim', orders: 110, revenue: 1100 },
-  { name: 'Omar Fathi', orders: 105, revenue: 1050 },
-  { name: 'Youssef Salem', orders: 100, revenue: 1000 },
-]
-
-const mockCompanyPerformance = [
-  { name: 'Company A', value: 35, revenue: 3500 },
-  { name: 'Company B', value: 25, revenue: 2500 },
-  { name: 'Company C', value: 20, revenue: 2000 },
-  { name: 'Company D', value: 15, revenue: 1500 },
-  { name: 'Company E', value: 5, revenue: 500 },
-]
-
-const COLORS = ['#0284c7', '#22c55e', '#f59e0b', '#ef4444', '#8b5cf6']
 
 export default function DashboardPage() {
   const [loading, setLoading] = useState(true)
-  const [stats, setStats] = useState({
+  const [stats] = useState({
     totalRevenue: 23000,
     totalSalaries: 13200,
     netProfit: 9800,
@@ -73,10 +32,7 @@ export default function DashboardPage() {
   })
 
   useEffect(() => {
-    // Simulate API call
-    setTimeout(() => {
-      setLoading(false)
-    }, 1000)
+    setLoading(false)
   }, [])
 
   if (loading) {
@@ -95,7 +51,7 @@ export default function DashboardPage() {
         </p>
       </div>
 
-      {/* Stats Cards */}
+      {/* Main Stats Cards */}
       <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
         <StatsCard
           title="Total Revenue"
@@ -165,109 +121,42 @@ export default function DashboardPage() {
         </div>
       </div>
 
-      {/* Charts Row 1 */}
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-        {/* Revenue & Profit Chart */}
-        <div className="card">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">
-            Revenue & Profit Trends
-          </h3>
-          <ResponsiveContainer width="100%" height={300}>
-            <LineChart data={mockWeeklyData}>
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="week" />
-              <YAxis />
-              <Tooltip formatter={(value) => formatCurrency(Number(value))} />
-              <Legend />
-              <Line
-                type="monotone"
-                dataKey="revenue"
-                stroke="#0284c7"
-                strokeWidth={2}
-                name="Revenue"
-              />
-              <Line
-                type="monotone"
-                dataKey="profit"
-                stroke="#22c55e"
-                strokeWidth={2}
-                name="Profit"
-              />
-            </LineChart>
-          </ResponsiveContainer>
-        </div>
-
-        {/* Orders Chart */}
-        <div className="card">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">Weekly Orders</h3>
-          <ResponsiveContainer width="100%" height={300}>
-            <BarChart data={mockWeeklyData}>
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="week" />
-              <YAxis />
-              <Tooltip />
-              <Legend />
-              <Bar dataKey="orders" fill="#0284c7" name="Orders" />
-            </BarChart>
-          </ResponsiveContainer>
-        </div>
-      </div>
-
-      {/* Charts Row 2 */}
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-        {/* Top Drivers */}
-        <div className="card">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">
-            Top Performing Drivers
-          </h3>
-          <div className="space-y-4">
-            {mockDriverPerformance.map((driver, index) => (
-              <div key={driver.name} className="flex items-center justify-between">
-                <div className="flex items-center space-x-3">
-                  <div className="flex-shrink-0 w-8 h-8 rounded-full bg-primary-100 flex items-center justify-center">
-                    <span className="text-sm font-semibold text-primary-600">
-                      {index + 1}
-                    </span>
-                  </div>
-                  <div>
-                    <p className="text-sm font-medium text-gray-900">{driver.name}</p>
-                    <p className="text-xs text-gray-500">{driver.orders} orders</p>
-                  </div>
-                </div>
-                <span className="text-sm font-semibold text-gray-900">
-                  {formatCurrency(driver.revenue)}
-                </span>
-              </div>
-            ))}
+      {/* Quick Actions */}
+      <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+        <div className="card hover:shadow-lg transition-shadow cursor-pointer">
+          <div className="flex items-center space-x-4">
+            <div className="p-3 bg-primary-100 rounded-lg">
+              <Users className="h-6 w-6 text-primary-600" />
+            </div>
+            <div>
+              <h3 className="font-semibold text-gray-900">Manage Drivers</h3>
+              <p className="text-sm text-gray-600">Add or edit driver information</p>
+            </div>
           </div>
         </div>
-
-        {/* Company Distribution */}
-        <div className="card">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">
-            Revenue by Company
-          </h3>
-          <ResponsiveContainer width="100%" height={300}>
-            <PieChart>
-              <Pie
-                data={mockCompanyPerformance}
-                cx="50%"
-                cy="50%"
-                labelLine={false}
-                label={({ name, percent }) =>
-                  `${name} ${(percent * 100).toFixed(0)}%`
-                }
-                outerRadius={80}
-                fill="#8884d8"
-                dataKey="value"
-              >
-                {mockCompanyPerformance.map((entry, index) => (
-                  <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                ))}
-              </Pie>
-              <Tooltip formatter={(value) => `${value}%`} />
-            </PieChart>
-          </ResponsiveContainer>
+        
+        <div className="card hover:shadow-lg transition-shadow cursor-pointer">
+          <div className="flex items-center space-x-4">
+            <div className="p-3 bg-success-100 rounded-lg">
+              <Building2 className="h-6 w-6 text-success-600" />
+            </div>
+            <div>
+              <h3 className="font-semibold text-gray-900">Manage Companies</h3>
+              <p className="text-sm text-gray-600">View partner companies</p>
+            </div>
+          </div>
+        </div>
+        
+        <div className="card hover:shadow-lg transition-shadow cursor-pointer">
+          <div className="flex items-center space-x-4">
+            <div className="p-3 bg-warning-100 rounded-lg">
+              <ShoppingCart className="h-6 w-6 text-warning-600" />
+            </div>
+            <div>
+              <h3 className="font-semibold text-gray-900">New Order</h3>
+              <p className="text-sm text-gray-600">Create a new order</p>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -300,6 +189,65 @@ export default function DashboardPage() {
                 New driver Mohamed Hassan added to training
               </p>
               <p className="text-xs text-gray-500 mt-1">3 hours ago</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Weekly Summary */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="card">
+          <h4 className="text-sm font-medium text-gray-600 mb-4">This Week</h4>
+          <div className="space-y-3">
+            <div>
+              <div className="flex items-center justify-between mb-1">
+                <span className="text-sm text-gray-600">Revenue</span>
+                <span className="text-sm font-semibold text-gray-900">{formatCurrency(6500)}</span>
+              </div>
+              <div className="w-full bg-gray-200 rounded-full h-2">
+                <div className="bg-primary-600 h-2 rounded-full" style={{ width: '85%' }} />
+              </div>
+            </div>
+            <div>
+              <div className="flex items-center justify-between mb-1">
+                <span className="text-sm text-gray-600">Orders</span>
+                <span className="text-sm font-semibold text-gray-900">550</span>
+              </div>
+              <div className="w-full bg-gray-200 rounded-full h-2">
+                <div className="bg-success-600 h-2 rounded-full" style={{ width: '92%' }} />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="card">
+          <h4 className="text-sm font-medium text-gray-600 mb-4">Top Driver</h4>
+          <div className="flex items-center space-x-3">
+            <div className="h-12 w-12 rounded-full bg-primary-100 flex items-center justify-center">
+              <span className="text-primary-600 font-semibold">AA</span>
+            </div>
+            <div className="flex-1">
+              <p className="font-semibold text-gray-900">Ahmed Ali</p>
+              <p className="text-sm text-gray-500">120 orders this week</p>
+            </div>
+            <div className="text-right">
+              <p className="text-lg font-bold text-gray-900">{formatCurrency(1200)}</p>
+            </div>
+          </div>
+        </div>
+
+        <div className="card">
+          <h4 className="text-sm font-medium text-gray-600 mb-4">Top Company</h4>
+          <div className="flex items-center space-x-3">
+            <div className="h-12 w-12 rounded-full bg-success-100 flex items-center justify-center">
+              <Building2 className="h-6 w-6 text-success-600" />
+            </div>
+            <div className="flex-1">
+              <p className="font-semibold text-gray-900">Company A Ltd</p>
+              <p className="text-sm text-gray-500">35% of total revenue</p>
+            </div>
+            <div className="text-right">
+              <p className="text-lg font-bold text-gray-900">{formatCurrency(3500)}</p>
             </div>
           </div>
         </div>

@@ -61,10 +61,8 @@ export default function CompaniesPage() {
   const [selectedCompany, setSelectedCompany] = useState<Company | null>(null)
 
   useEffect(() => {
-    setTimeout(() => {
-      setCompanies(mockCompanies)
-      setLoading(false)
-    }, 800)
+    setCompanies(mockCompanies)
+    setLoading(false)
   }, [])
 
   const filteredCompanies = companies.filter((company) => {

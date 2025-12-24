@@ -74,11 +74,8 @@ export default function DriversPage() {
   const [selectedDriver, setSelectedDriver] = useState<Driver | null>(null)
 
   useEffect(() => {
-    // Simulate API call
-    setTimeout(() => {
-      setDrivers(mockDrivers)
-      setLoading(false)
-    }, 800)
+    setDrivers(mockDrivers)
+    setLoading(false)
   }, [])
 
   const filteredDrivers = drivers.filter((driver) => {

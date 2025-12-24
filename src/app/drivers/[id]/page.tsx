@@ -167,14 +167,11 @@ export default function DriverDetailPage({ params }: { params: { id: string } })
     : 0
 
   useEffect(() => {
-    // Simulate API call
-    setTimeout(() => {
-      setDriver(mockDriver)
-      setWeeklySalaries(mockWeeklySalaries)
-      setAdvances(mockAdvances)
-      setRecentOrders(mockOrders)
-      setLoading(false)
-    }, 800)
+    setDriver(mockDriver)
+    setWeeklySalaries(mockWeeklySalaries)
+    setAdvances(mockAdvances)
+    setRecentOrders(mockOrders)
+    setLoading(false)
   }, [params.id])
 
   if (loading) {
