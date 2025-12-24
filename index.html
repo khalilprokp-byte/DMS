@@ -1,0 +1,1475 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>نظام إدارة السائقين - Driver Management System</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <style>
+        * { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        .sidebar { width: 260px; transition: all 0.3s; }
+        .main-content { margin-right: 260px; }
+        @media (max-width: 768px) {
+            .sidebar { transform: translateX(100%); position: fixed; right: 0; z-index: 50; height: 100vh; }
+            .sidebar.open { transform: translateX(0); }
+            .main-content { margin-right: 0; }
+        }
+        .card { background: white; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); padding: 1.5rem; }
+        .btn { padding: 0.625rem 1.25rem; border-radius: 8px; font-weight: 500; cursor: pointer; transition: all 0.2s; }
+        .btn-primary { background: #0284c7; color: white; }
+        .btn-primary:hover { background: #0369a1; }
+        .btn-success { background: #16a34a; color: white; }
+        .btn-danger { background: #dc2626; color: white; }
+        .btn-secondary { background: #6b7280; color: white; }
+        .badge { padding: 0.25rem 0.75rem; border-radius: 9999px; font-size: 0.75rem; font-weight: 500; }
+        .badge-success { background: #dcfce7; color: #166534; }
+        .badge-warning { background: #fef3c7; color: #92400e; }
+        .badge-danger { background: #fee2e2; color: #991b1b; }
+        .badge-info { background: #e0f2fe; color: #075985; }
+        .input { width: 100%; padding: 0.625rem 1rem; border: 1px solid #d1d5db; border-radius: 8px; }
+        .input:focus { outline: none; border-color: #0284c7; ring: 2px; ring-color: #bae6fd; }
+        .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 100; align-items: center; justify-content: center; }
+        .modal.active { display: flex; }
+        .modal-content { background: white; border-radius: 12px; max-width: 90%; max-height: 90vh; overflow-y: auto; }
+        .hidden { display: none !important; }
+        .stat-card { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border-radius: 12px; padding: 1.5rem; }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <!-- Sidebar -->
+    <div id="sidebar" class="sidebar bg-white shadow-lg">
+        <div class="p-6 border-b">
+            <h1 class="text-xl font-bold text-blue-600">نظام إدارة السائقين</h1>
+        </div>
+        <nav class="p-4">
+            <a href="#" onclick="showPage('dashboard')" class="nav-item flex items-center gap-3 p-3 rounded-lg hover:bg-gray-100 mb-2">
+                <span>📊</span> لوحة التحكم
+            </a>
+            <a href="#" onclick="showPage('drivers')" class="nav-item flex items-center gap-3 p-3 rounded-lg hover:bg-gray-100 mb-2">
+                <span>👥</span> السائقين
+            </a>
+            <a href="#" onclick="showPage('companies')" class="nav-item flex items-center gap-3 p-3 rounded-lg hover:bg-gray-100 mb-2">
+                <span>🏢</span> الشركات
+            </a>
+            <a href="#" onclick="showPage('orders')" class="nav-item flex items-center gap-3 p-3 rounded-lg hover:bg-gray-100 mb-2">
+                <span>📦</span> الطلبات
+            </a>
+            <a href="#" onclick="showPage('salaries')" class="nav-item flex items-center gap-3 p-3 rounded-lg hover:bg-gray-100 mb-2">
+                <span>💰</span> الرواتب
+            </a>
+            <a href="#" onclick="showPage('advances')" class="nav-item flex items-center gap-3 p-3 rounded-lg hover:bg-gray-100 mb-2">
+                <span>💳</span> السلف
+            </a>
+            <a href="#" onclick="showPage('reports')" class="nav-item flex items-center gap-3 p-3 rounded-lg hover:bg-gray-100 mb-2">
+                <span>📄</span> التقارير
+            </a>
+        </nav>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <!-- Header -->
+        <div class="bg-white shadow-sm p-4 flex items-center justify-between">
+            <button onclick="toggleSidebar()" class="md:hidden p-2">
+                <span class="text-2xl">☰</span>
+            </button>
+            <div class="flex items-center gap-4">
+                <span class="text-sm text-gray-600">الأسبوع 51، 2024</span>
+                <span class="text-sm text-gray-600">Admin</span>
+            </div>
+        </div>
+
+        <!-- Pages Container -->
+        <div id="pages-container" class="p-6">
+            
+            <!-- Dashboard Page -->
+            <div id="dashboard-page" class="page">
+                <h2 class="text-3xl font-bold mb-6">لوحة التحكم</h2>
+                
+                <!-- Stats Cards -->
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
+                    <div class="card">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-sm text-gray-600">إجمالي الإيرادات</p>
+                                <p class="text-2xl font-bold mt-2" id="total-revenue">£0</p>
+                            </div>
+                            <span class="text-4xl">💰</span>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-sm text-gray-600">مجموع الرواتب</p>
+                                <p class="text-2xl font-bold mt-2" id="total-salaries">£0</p>
+                            </div>
+                            <span class="text-4xl">💵</span>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-sm text-gray-600">صافي الربح</p>
+                                <p class="text-2xl font-bold mt-2 text-green-600" id="net-profit">£0</p>
+                            </div>
+                            <span class="text-4xl">📈</span>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-sm text-gray-600">إجمالي الطلبات</p>
+                                <p class="text-2xl font-bold mt-2" id="total-orders">0</p>
+                            </div>
+                            <span class="text-4xl">📦</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Secondary Stats -->
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
+                    <div class="card">
+                        <p class="text-sm text-gray-600">سائقين نشطين</p>
+                        <p class="text-2xl font-bold mt-2" id="active-drivers">0</p>
+                    </div>
+                    <div class="card">
+                        <p class="text-sm text-gray-600">تحت التدريب</p>
+                        <p class="text-2xl font-bold mt-2 text-yellow-600" id="training-drivers">0</p>
+                    </div>
+                    <div class="card">
+                        <p class="text-sm text-gray-600">شركات نشطة</p>
+                        <p class="text-2xl font-bold mt-2" id="active-companies">0</p>
+                    </div>
+                    <div class="card">
+                        <p class="text-sm text-gray-600">طلبات مكتملة</p>
+                        <p class="text-2xl font-bold mt-2 text-green-600" id="completed-orders">0</p>
+                    </div>
+                </div>
+
+                <!-- Charts -->
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+                    <div class="card">
+                        <h3 class="text-lg font-semibold mb-4">الإيرادات الأسبوعية</h3>
+                        <canvas id="revenueChart" height="300"></canvas>
+                    </div>
+                    <div class="card">
+                        <h3 class="text-lg font-semibold mb-4">توزيع الطلبات</h3>
+                        <canvas id="ordersChart" height="300"></canvas>
+                    </div>
+                </div>
+
+                <!-- Recent Activity -->
+                <div class="card">
+                    <h3 class="text-lg font-semibold mb-4">آخر النشاطات</h3>
+                    <div id="recent-activity" class="space-y-3"></div>
+                </div>
+            </div>
+
+            <!-- Drivers Page -->
+            <div id="drivers-page" class="page hidden">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-3xl font-bold">إدارة السائقين</h2>
+                    <button onclick="openDriverModal()" class="btn btn-primary">➕ إضافة سائق</button>
+                </div>
+
+                <!-- Stats -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                    <div class="card">
+                        <p class="text-sm text-gray-600">نشطين</p>
+                        <p class="text-2xl font-bold text-green-600" id="drivers-active">0</p>
+                    </div>
+                    <div class="card">
+                        <p class="text-sm text-gray-600">تدريب</p>
+                        <p class="text-2xl font-bold text-yellow-600" id="drivers-training">0</p>
+                    </div>
+                    <div class="card">
+                        <p class="text-sm text-gray-600">موقوفين</p>
+                        <p class="text-2xl font-bold text-red-600" id="drivers-suspended">0</p>
+                    </div>
+                </div>
+
+                <!-- Search -->
+                <div class="card mb-6">
+                    <input type="text" id="driver-search" placeholder="🔍 بحث عن سائق..." class="input" onkeyup="filterDrivers()">
+                </div>
+
+                <!-- Drivers List -->
+                <div class="card">
+                    <div id="drivers-list" class="space-y-4"></div>
+                </div>
+            </div>
+
+            <!-- Companies Page -->
+            <div id="companies-page" class="page hidden">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-3xl font-bold">إدارة الشركات</h2>
+                    <button onclick="openCompanyModal()" class="btn btn-primary">➕ إضافة شركة</button>
+                </div>
+
+                <!-- Companies List -->
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <div id="companies-list"></div>
+                </div>
+            </div>
+
+            <!-- Orders Page -->
+            <div id="orders-page" class="page hidden">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-3xl font-bold">إدارة الطلبات</h2>
+                    <button onclick="openOrderModal()" class="btn btn-primary">➕ طلب جديد</button>
+                </div>
+
+                <!-- Stats -->
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+                    <div class="card">
+                        <p class="text-sm text-gray-600">إجمالي الطلبات</p>
+                        <p class="text-2xl font-bold" id="orders-total">0</p>
+                    </div>
+                    <div class="card">
+                        <p class="text-sm text-gray-600">مكتملة</p>
+                        <p class="text-2xl font-bold text-green-600" id="orders-completed">0</p>
+                    </div>
+                    <div class="card">
+                        <p class="text-sm text-gray-600">قيد التنفيذ</p>
+                        <p class="text-2xl font-bold text-blue-600" id="orders-progress">0</p>
+                    </div>
+                    <div class="card">
+                        <p class="text-sm text-gray-600">الإيرادات</p>
+                        <p class="text-2xl font-bold text-green-600" id="orders-revenue">£0</p>
+                    </div>
+                </div>
+
+                <!-- Orders Table -->
+                <div class="card overflow-x-auto">
+                    <table class="w-full">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th class="p-3 text-right">رقم الطلب</th>
+                                <th class="p-3 text-right">التاريخ</th>
+                                <th class="p-3 text-right">الشركة</th>
+                                <th class="p-3 text-right">السائق</th>
+                                <th class="p-3 text-right">العميل</th>
+                                <th class="p-3 text-right">Stops</th>
+                                <th class="p-3 text-right">الإيرادات</th>
+                                <th class="p-3 text-right">الحالة</th>
+                                <th class="p-3 text-right">إجراءات</th>
+                            </tr>
+                        </thead>
+                        <tbody id="orders-list"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Salaries Page -->
+            <div id="salaries-page" class="page hidden">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-3xl font-bold">إدارة الرواتب</h2>
+                    <button onclick="calculateWeeklySalaries()" class="btn btn-primary">🧮 حساب الرواتب الأسبوعية</button>
+                </div>
+
+                <!-- Weekly Summary -->
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+                    <div class="card">
+                        <p class="text-sm text-gray-600">الأسبوع الحالي</p>
+                        <p class="text-2xl font-bold">الأسبوع 51</p>
+                    </div>
+                    <div class="card">
+                        <p class="text-sm text-gray-600">إجمالي الرواتب</p>
+                        <p class="text-2xl font-bold" id="salaries-total">£0</p>
+                    </div>
+                    <div class="card">
+                        <p class="text-sm text-gray-600">البونص</p>
+                        <p class="text-2xl font-bold text-green-600" id="salaries-bonus">£0</p>
+                    </div>
+                    <div class="card">
+                        <p class="text-sm text-gray-600">الخصومات</p>
+                        <p class="text-2xl font-bold text-red-600" id="salaries-deductions">£0</p>
+                    </div>
+                </div>
+
+                <!-- Salaries List -->
+                <div class="card">
+                    <div id="salaries-list" class="space-y-4"></div>
+                </div>
+            </div>
+
+            <!-- Advances Page -->
+            <div id="advances-page" class="page hidden">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-3xl font-bold">إدارة السلف</h2>
+                    <button onclick="openAdvanceModal()" class="btn btn-primary">➕ إضافة سلفة</button>
+                </div>
+
+                <!-- Stats -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                    <div class="card">
+                        <p class="text-sm text-gray-600">سلف نشطة</p>
+                        <p class="text-2xl font-bold" id="advances-active">0</p>
+                    </div>
+                    <div class="card">
+                        <p class="text-sm text-gray-600">المبلغ الإجمالي</p>
+                        <p class="text-2xl font-bold text-red-600" id="advances-total">£0</p>
+                    </div>
+                    <div class="card">
+                        <p class="text-sm text-gray-600">المتبقي</p>
+                        <p class="text-2xl font-bold text-yellow-600" id="advances-remaining">£0</p>
+                    </div>
+                </div>
+
+                <!-- Advances List -->
+                <div class="card">
+                    <div id="advances-list" class="space-y-4"></div>
+                </div>
+            </div>
+
+            <!-- Reports Page -->
+            <div id="reports-page" class="page hidden">
+                <h2 class="text-3xl font-bold mb-6">التقارير</h2>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- Weekly Report -->
+                    <div class="card">
+                        <h3 class="text-xl font-semibold mb-4">تقرير أسبوعي</h3>
+                        <div class="space-y-2 mb-4">
+                            <div class="flex justify-between">
+                                <span>الإيرادات:</span>
+                                <span class="font-bold" id="report-revenue">£0</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span>الرواتب:</span>
+                                <span class="font-bold" id="report-salaries">£0</span>
+                            </div>
+                            <div class="flex justify-between border-t pt-2">
+                                <span>صافي الربح:</span>
+                                <span class="font-bold text-green-600" id="report-profit">£0</span>
+                            </div>
+                        </div>
+                        <button onclick="downloadReport('weekly')" class="btn btn-primary w-full">📥 تحميل التقرير</button>
+                    </div>
+
+                    <!-- Driver Performance -->
+                    <div class="card">
+                        <h3 class="text-xl font-semibold mb-4">أداء السائقين</h3>
+                        <div id="driver-performance" class="space-y-2"></div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Driver Modal -->
+    <div id="driver-modal" class="modal">
+        <div class="modal-content p-6" style="width: 600px;">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-xl font-bold" id="driver-modal-title">إضافة سائق جديد</h3>
+                <button onclick="closeDriverModal()" class="text-2xl">&times;</button>
+            </div>
+            <form id="driver-form" onsubmit="saveDriver(event)">
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium mb-1">الاسم الكامل *</label>
+                        <input type="text" id="driver-name" required class="input">
+                    </div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium mb-1">رقم الهاتف *</label>
+                            <input type="tel" id="driver-phone" required class="input">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium mb-1">واتساب *</label>
+                            <input type="tel" id="driver-whatsapp" required class="input">
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium mb-1">تاريخ البدء *</label>
+                            <input type="date" id="driver-start-date" required class="input">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium mb-1">الحالة *</label>
+                            <select id="driver-status" required class="input">
+                                <option value="training">تدريب</option>
+                                <option value="active">نشط</option>
+                                <option value="suspended">موقوف</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium mb-1">الراتب الأسبوعي (£) *</label>
+                            <input type="number" id="driver-salary" required value="120" class="input">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium mb-1">الطلبات المطلوبة *</label>
+                            <input type="number" id="driver-required-orders" required value="100" class="input">
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium mb-1">ملاحظات</label>
+                        <textarea id="driver-notes" rows="3" class="input"></textarea>
+                    </div>
+                </div>
+                <div class="flex gap-3 mt-6">
+                    <button type="button" onclick="closeDriverModal()" class="btn btn-secondary flex-1">إلغاء</button>
+                    <button type="submit" class="btn btn-primary flex-1">حفظ</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Company Modal -->
+    <div id="company-modal" class="modal">
+        <div class="modal-content p-6" style="width: 600px;">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-xl font-bold">إضافة شركة جديدة</h3>
+                <button onclick="closeCompanyModal()" class="text-2xl">&times;</button>
+            </div>
+            <form id="company-form" onsubmit="saveCompany(event)">
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium mb-1">اسم الشركة *</label>
+                        <input type="text" id="company-name" required class="input">
+                    </div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium mb-1">شخص التواصل *</label>
+                            <input type="text" id="company-contact" required class="input">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium mb-1">رقم الهاتف *</label>
+                            <input type="tel" id="company-phone" required class="input">
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium mb-1">البريد الإلكتروني *</label>
+                        <input type="email" id="company-email" required class="input">
+                    </div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium mb-1">نوع التسعير *</label>
+                            <select id="company-pricing-type" required class="input">
+                                <option value="per_order">لكل طلب</option>
+                                <option value="per_stop">لكل Stop</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium mb-1">قيمة السعر (£) *</label>
+                            <input type="number" step="0.01" id="company-price" required class="input">
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium mb-1">الحالة *</label>
+                        <select id="company-status" required class="input">
+                            <option value="active">نشطة</option>
+                            <option value="paused">متوقفة</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium mb-1">تعليمات ثابتة</label>
+                        <textarea id="company-instructions" rows="2" class="input"></textarea>
+                    </div>
+                </div>
+                <div class="flex gap-3 mt-6">
+                    <button type="button" onclick="closeCompanyModal()" class="btn btn-secondary flex-1">إلغاء</button>
+                    <button type="submit" class="btn btn-primary flex-1">حفظ</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Order Modal -->
+    <div id="order-modal" class="modal">
+        <div class="modal-content p-6" style="width: 700px;">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-xl font-bold">إضافة طلب جديد</h3>
+                <button onclick="closeOrderModal()" class="text-2xl">&times;</button>
+            </div>
+            <form id="order-form" onsubmit="saveOrder(event)">
+                <div class="space-y-4">
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium mb-1">الشركة *</label>
+                            <select id="order-company" required class="input" onchange="calculateOrderRevenue()">
+                                <option value="">اختر الشركة</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium mb-1">السائق *</label>
+                            <select id="order-driver" required class="input">
+                                <option value="">اختر السائق</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium mb-1">التاريخ *</label>
+                            <input type="date" id="order-date" required class="input">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium mb-1">الرمز البريدي</label>
+                            <input type="text" id="order-postcode" class="input">
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium mb-1">اسم العميل</label>
+                            <input type="text" id="order-customer" class="input">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium mb-1">رقم الهاتف</label>
+                            <input type="tel" id="order-phone" class="input">
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium mb-1">عدد Stops *</label>
+                            <input type="number" id="order-stops" required value="1" min="1" class="input" onchange="calculateOrderRevenue()">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium mb-1">الإيرادات المحتسبة</label>
+                            <div id="order-revenue-display" class="input bg-green-50 font-bold text-green-600">£0.00</div>
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium mb-1">ملاحظات التوصيل</label>
+                        <textarea id="order-notes" rows="2" class="input"></textarea>
+                    </div>
+                    <div id="company-info" class="hidden p-3 bg-blue-50 rounded-lg border border-blue-200">
+                        <p class="text-sm font-medium text-blue-900 mb-1">معلومات التسعير:</p>
+                        <p id="pricing-info" class="text-sm text-blue-700"></p>
+                    </div>
+                </div>
+                <div class="flex gap-3 mt-6">
+                    <button type="button" onclick="closeOrderModal()" class="btn btn-secondary flex-1">إلغاء</button>
+                    <button type="submit" class="btn btn-primary flex-1">إضافة الطلب</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Advance Modal -->
+    <div id="advance-modal" class="modal">
+        <div class="modal-content p-6" style="width: 600px;">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-xl font-bold">إضافة سلفة جديدة</h3>
+                <button onclick="closeAdvanceModal()" class="text-2xl">&times;</button>
+            </div>
+            <form id="advance-form" onsubmit="saveAdvance(event)">
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium mb-1">السائق *</label>
+                        <select id="advance-driver" required class="input">
+                            <option value="">اختر السائق</option>
+                        </select>
+                    </div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium mb-1">المبلغ (£) *</label>
+                            <input type="number" step="0.01" id="advance-amount" required class="input">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium mb-1">تاريخ السلفة *</label>
+                            <input type="date" id="advance-date" required class="input">
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium mb-1">طريقة الدفع *</label>
+                        <select id="advance-payment-method" required class="input" onchange="toggleInstallments()">
+                            <option value="one_time">دفعة واحدة</option>
+                            <option value="installments">أقساط</option>
+                        </select>
+                    </div>
+                    <div id="installments-fields" class="hidden grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium mb-1">عدد الأقساط</label>
+                            <input type="number" id="advance-installments" min="2" class="input">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium mb-1">قيمة القسط (£)</label>
+                            <input type="number" step="0.01" id="advance-installment-amount" readonly class="input bg-gray-50">
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium mb-1">ملاحظات</label>
+                        <textarea id="advance-notes" rows="2" class="input"></textarea>
+                    </div>
+                </div>
+                <div class="flex gap-3 mt-6">
+                    <button type="button" onclick="closeAdvanceModal()" class="btn btn-secondary flex-1">إلغاء</button>
+                    <button type="submit" class="btn btn-primary flex-1">حفظ</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Data Storage
+        let drivers = JSON.parse(localStorage.getItem('drivers') || '[]');
+        let companies = JSON.parse(localStorage.getItem('companies') || '[]');
+        let orders = JSON.parse(localStorage.getItem('orders') || '[]');
+        let salaries = JSON.parse(localStorage.getItem('salaries') || '[]');
+        let advances = JSON.parse(localStorage.getItem('advances') || '[]');
+
+        // Initialize with sample data if empty
+        if (drivers.length === 0) {
+            drivers = [
+                {id: 1001, name: 'أحمد علي محمد', phone: '+447700900123', whatsapp: '+447700900123', startDate: '2024-01-15', status: 'active', salary: 120, requiredOrders: 100, notes: 'سائق ممتاز'},
+                {id: 1002, name: 'محمد حسن إبراهيم', phone: '+447700900124', whatsapp: '+447700900124', startDate: '2024-12-10', status: 'training', salary: 120, requiredOrders: 100, notes: ''},
+                {id: 1003, name: 'خالد إبراهيم أحمد', phone: '+447700900125', whatsapp: '+447700900125', startDate: '2024-02-01', status: 'active', salary: 120, requiredOrders: 100, notes: 'موثوق'}
+            ];
+            localStorage.setItem('drivers', JSON.stringify(drivers));
+        }
+
+        if (companies.length === 0) {
+            companies = [
+                {id: 2001, name: 'Company A Ltd', contact: 'Jane Doe', phone: '+447700900888', email: 'jane@companya.com', pricingType: 'per_order', price: 15, status: 'active', instructions: 'Always ring bell twice'},
+                {id: 2002, name: 'Express Delivery Co', contact: 'John Smith', phone: '+447700900777', email: 'john@express.com', pricingType: 'per_stop', price: 5, status: 'active', instructions: 'Call before delivery'}
+            ];
+            localStorage.setItem('companies', JSON.stringify(companies));
+        }
+        
+        // Initialize sample orders if empty
+        if (orders.length === 0) {
+            orders = [
+                {id: 3001, companyId: 2001, driverId: 1001, date: '2024-12-20', postcode: 'SW1A 1AA', customer: 'John Smith', phone: '+447700900001', stops: 1, notes: '', revenue: 15, status: 'completed'},
+                {id: 3002, companyId: 2002, driverId: 1001, date: '2024-12-20', postcode: 'SW1A 2AA', customer: 'Mary Johnson', phone: '+447700900002', stops: 3, notes: '', revenue: 15, status: 'completed'},
+                {id: 3003, companyId: 2001, driverId: 1003, date: '2024-12-21', postcode: 'W1A 1AA', customer: 'David Brown', phone: '+447700900003', stops: 1, notes: '', revenue: 15, status: 'in_progress'}
+            ];
+            localStorage.setItem('orders', JSON.stringify(orders));
+        }
+
+        // Helper Functions
+        function formatCurrency(amount) {
+            return '£' + parseFloat(amount).toFixed(2);
+        }
+
+        function formatDate(dateStr) {
+            const date = new Date(dateStr);
+            return date.toLocaleDateString('ar-SA');
+        }
+
+        function toggleSidebar() {
+            document.getElementById('sidebar').classList.toggle('open');
+        }
+
+        function showPage(pageName) {
+            document.querySelectorAll('.page').forEach(page => page.classList.add('hidden'));
+            document.getElementById(pageName + '-page').classList.remove('hidden');
+            
+            // Update active nav
+            document.querySelectorAll('.nav-item').forEach(item => {
+                item.classList.remove('bg-blue-100', 'text-blue-600');
+            });
+            
+            // Load page data
+            if (pageName === 'dashboard') loadDashboard();
+            else if (pageName === 'drivers') loadDrivers();
+            else if (pageName === 'companies') loadCompanies();
+            else if (pageName === 'orders') loadOrders();
+            else if (pageName === 'salaries') loadSalaries();
+            else if (pageName === 'advances') loadAdvances();
+            else if (pageName === 'reports') loadReports();
+
+            // Close sidebar on mobile
+            if (window.innerWidth < 768) {
+                document.getElementById('sidebar').classList.remove('open');
+            }
+        }
+
+        // Dashboard Functions
+        function loadDashboard() {
+            const totalRevenue = orders.reduce((sum, o) => sum + parseFloat(o.revenue), 0);
+            const totalSalaries = salaries.reduce((sum, s) => sum + parseFloat(s.finalSalary), 0);
+            const netProfit = totalRevenue - totalSalaries;
+            
+            document.getElementById('total-revenue').textContent = formatCurrency(totalRevenue);
+            document.getElementById('total-salaries').textContent = formatCurrency(totalSalaries);
+            document.getElementById('net-profit').textContent = formatCurrency(netProfit);
+            document.getElementById('total-orders').textContent = orders.length;
+            
+            document.getElementById('active-drivers').textContent = drivers.filter(d => d.status === 'active').length;
+            document.getElementById('training-drivers').textContent = drivers.filter(d => d.status === 'training').length;
+            document.getElementById('active-companies').textContent = companies.filter(c => c.status === 'active').length;
+            document.getElementById('completed-orders').textContent = orders.filter(o => o.status === 'completed').length;
+
+            // Charts
+            loadCharts();
+            loadRecentActivity();
+        }
+
+        function loadCharts() {
+            // Revenue Chart
+            const revenueCtx = document.getElementById('revenueChart');
+            if (revenueCtx) {
+                const chart = Chart.getChart(revenueCtx);
+                if (chart) chart.destroy();
+                
+                new Chart(revenueCtx, {
+                    type: 'line',
+                    data: {
+                        labels: ['الأسبوع 48', 'الأسبوع 49', 'الأسبوع 50', 'الأسبوع 51'],
+                        datasets: [{
+                            label: 'الإيرادات',
+                            data: [5000, 5500, 6000, 6500],
+                            borderColor: '#0284c7',
+                            backgroundColor: 'rgba(2, 132, 199, 0.1)',
+                            tension: 0.4
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false
+                    }
+                });
+            }
+
+            // Orders Chart
+            const ordersCtx = document.getElementById('ordersChart');
+            if (ordersCtx) {
+                const chart = Chart.getChart(ordersCtx);
+                if (chart) chart.destroy();
+                
+                new Chart(ordersCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: ['الأسبوع 48', 'الأسبوع 49', 'الأسبوع 50', 'الأسبوع 51'],
+                        datasets: [{
+                            label: 'الطلبات',
+                            data: [450, 480, 520, 550],
+                            backgroundColor: '#0284c7'
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false
+                    }
+                });
+            }
+        }
+
+        function loadRecentActivity() {
+            const container = document.getElementById('recent-activity');
+            const recent = orders.slice(-5).reverse();
+            
+            container.innerHTML = recent.map(order => {
+                const driver = drivers.find(d => d.id == order.driverId);
+                return `
+                    <div class="flex items-start gap-3 p-3 bg-gray-50 rounded-lg">
+                        <span class="text-green-500">✓</span>
+                        <div class="flex-1">
+                            <p class="text-sm font-medium">طلب جديد تم تعيينه لـ ${driver?.name || 'سائق'}</p>
+                            <p class="text-xs text-gray-500">${formatDate(order.date)}</p>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // Driver Functions
+        function loadDrivers() {
+            document.getElementById('drivers-active').textContent = drivers.filter(d => d.status === 'active').length;
+            document.getElementById('drivers-training').textContent = drivers.filter(d => d.status === 'training').length;
+            document.getElementById('drivers-suspended').textContent = drivers.filter(d => d.status === 'suspended').length;
+            
+            renderDrivers();
+        }
+
+        function renderDrivers(filteredDrivers = drivers) {
+            const container = document.getElementById('drivers-list');
+            
+            if (filteredDrivers.length === 0) {
+                container.innerHTML = '<p class="text-center text-gray-500 py-8">لا يوجد سائقين</p>';
+                return;
+            }
+            
+            container.innerHTML = filteredDrivers.map(driver => `
+                <div class="p-4 border rounded-lg hover:shadow-md transition-shadow">
+                    <div class="flex items-center justify-between">
+                        <div class="flex-1">
+                            <h3 class="font-semibold text-lg">${driver.name}</h3>
+                            <p class="text-sm text-gray-600">📱 ${driver.phone}</p>
+                            <p class="text-sm text-gray-600">📅 بدأ: ${formatDate(driver.startDate)}</p>
+                            <p class="text-sm mt-2">💰 ${formatCurrency(driver.salary)} | 📦 ${driver.requiredOrders} طلب/أسبوع</p>
+                        </div>
+                        <div class="text-left space-y-2">
+                            <span class="badge ${driver.status === 'active' ? 'badge-success' : driver.status === 'training' ? 'badge-warning' : 'badge-danger'}">
+                                ${driver.status === 'active' ? 'نشط' : driver.status === 'training' ? 'تدريب' : 'موقوف'}
+                            </span>
+                            <div class="flex gap-2 mt-2">
+                                <button onclick="editDriver(${driver.id})" class="text-blue-600 hover:text-blue-800">✏️</button>
+                                <button onclick="deleteDriver(${driver.id})" class="text-red-600 hover:text-red-800">🗑️</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function filterDrivers() {
+            const search = document.getElementById('driver-search').value.toLowerCase();
+            const filtered = drivers.filter(d => 
+                d.name.toLowerCase().includes(search) || 
+                d.phone.includes(search)
+            );
+            renderDrivers(filtered);
+        }
+
+        function openDriverModal(driverId = null) {
+            const modal = document.getElementById('driver-modal');
+            const form = document.getElementById('driver-form');
+            form.reset();
+            
+            if (driverId) {
+                const driver = drivers.find(d => d.id === driverId);
+                document.getElementById('driver-modal-title').textContent = 'تعديل السائق';
+                document.getElementById('driver-name').value = driver.name;
+                document.getElementById('driver-phone').value = driver.phone;
+                document.getElementById('driver-whatsapp').value = driver.whatsapp;
+                document.getElementById('driver-start-date').value = driver.startDate;
+                document.getElementById('driver-status').value = driver.status;
+                document.getElementById('driver-salary').value = driver.salary;
+                document.getElementById('driver-required-orders').value = driver.requiredOrders;
+                document.getElementById('driver-notes').value = driver.notes;
+                form.dataset.driverId = driverId;
+            } else {
+                document.getElementById('driver-modal-title').textContent = 'إضافة سائق جديد';
+                document.getElementById('driver-start-date').value = new Date().toISOString().split('T')[0];
+                delete form.dataset.driverId;
+            }
+            
+            modal.classList.add('active');
+        }
+
+        function closeDriverModal() {
+            document.getElementById('driver-modal').classList.remove('active');
+        }
+
+        function saveDriver(event) {
+            event.preventDefault();
+            
+            const form = event.target;
+            const driverId = form.dataset.driverId;
+            
+            const driverData = {
+                id: driverId ? parseInt(driverId) : Date.now(),
+                name: document.getElementById('driver-name').value,
+                phone: document.getElementById('driver-phone').value,
+                whatsapp: document.getElementById('driver-whatsapp').value,
+                startDate: document.getElementById('driver-start-date').value,
+                status: document.getElementById('driver-status').value,
+                salary: parseFloat(document.getElementById('driver-salary').value),
+                requiredOrders: parseInt(document.getElementById('driver-required-orders').value),
+                notes: document.getElementById('driver-notes').value
+            };
+            
+            if (driverId) {
+                const index = drivers.findIndex(d => d.id === parseInt(driverId));
+                drivers[index] = driverData;
+            } else {
+                drivers.push(driverData);
+            }
+            
+            localStorage.setItem('drivers', JSON.stringify(drivers));
+            closeDriverModal();
+            loadDrivers();
+        }
+
+        function editDriver(id) {
+            openDriverModal(id);
+        }
+
+        function deleteDriver(id) {
+            if (confirm('هل أنت متأكد من حذف هذا السائق؟')) {
+                drivers = drivers.filter(d => d.id !== id);
+                localStorage.setItem('drivers', JSON.stringify(drivers));
+                loadDrivers();
+            }
+        }
+
+        // Company Functions
+        function loadCompanies() {
+            const container = document.getElementById('companies-list');
+            
+            container.innerHTML = companies.map(company => `
+                <div class="card">
+                    <div class="flex items-start justify-between mb-4">
+                        <div>
+                            <h3 class="font-semibold text-lg">${company.name}</h3>
+                            <p class="text-sm text-gray-600">${company.contact}</p>
+                        </div>
+                        <span class="badge ${company.status === 'active' ? 'badge-success' : 'badge-warning'}">
+                            ${company.status === 'active' ? 'نشطة' : 'متوقفة'}
+                        </span>
+                    </div>
+                    <div class="space-y-2 mb-4">
+                        <p class="text-sm">📧 ${company.email}</p>
+                        <p class="text-sm">📱 ${company.phone}</p>
+                        <div class="flex items-center justify-between pt-2 border-t">
+                            <span class="text-sm text-gray-600">${company.pricingType === 'per_order' ? 'لكل طلب' : 'لكل Stop'}</span>
+                            <span class="text-lg font-bold text-blue-600">${formatCurrency(company.price)}</span>
+                        </div>
+                    </div>
+                    <div class="flex gap-2">
+                        <button onclick="editCompany(${company.id})" class="btn btn-primary flex-1 text-sm">تعديل</button>
+                        <button onclick="deleteCompany(${company.id})" class="btn btn-danger flex-1 text-sm">حذف</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function openCompanyModal(companyId = null) {
+            const modal = document.getElementById('company-modal');
+            const form = document.getElementById('company-form');
+            form.reset();
+            
+            if (companyId) {
+                const company = companies.find(c => c.id === companyId);
+                document.getElementById('company-name').value = company.name;
+                document.getElementById('company-contact').value = company.contact;
+                document.getElementById('company-phone').value = company.phone;
+                document.getElementById('company-email').value = company.email;
+                document.getElementById('company-pricing-type').value = company.pricingType;
+                document.getElementById('company-price').value = company.price;
+                document.getElementById('company-status').value = company.status;
+                document.getElementById('company-instructions').value = company.instructions || '';
+                form.dataset.companyId = companyId;
+            } else {
+                delete form.dataset.companyId;
+            }
+            
+            modal.classList.add('active');
+        }
+
+        function closeCompanyModal() {
+            document.getElementById('company-modal').classList.remove('active');
+        }
+
+        function saveCompany(event) {
+            event.preventDefault();
+            
+            const form = event.target;
+            const companyId = form.dataset.companyId;
+            
+            const companyData = {
+                id: companyId ? parseInt(companyId) : Date.now(),
+                name: document.getElementById('company-name').value,
+                contact: document.getElementById('company-contact').value,
+                phone: document.getElementById('company-phone').value,
+                email: document.getElementById('company-email').value,
+                pricingType: document.getElementById('company-pricing-type').value,
+                price: parseFloat(document.getElementById('company-price').value),
+                status: document.getElementById('company-status').value,
+                instructions: document.getElementById('company-instructions').value
+            };
+            
+            if (companyId) {
+                const index = companies.findIndex(c => c.id === parseInt(companyId));
+                companies[index] = companyData;
+            } else {
+                companies.push(companyData);
+            }
+            
+            localStorage.setItem('companies', JSON.stringify(companies));
+            closeCompanyModal();
+            loadCompanies();
+        }
+
+        function editCompany(id) {
+            openCompanyModal(id);
+        }
+
+        function deleteCompany(id) {
+            if (confirm('هل أنت متأكد من حذف هذه الشركة؟')) {
+                companies = companies.filter(c => c.id !== id);
+                localStorage.setItem('companies', JSON.stringify(companies));
+                loadCompanies();
+            }
+        }
+
+        // Order Functions
+        function loadOrders() {
+            document.getElementById('orders-total').textContent = orders.length;
+            document.getElementById('orders-completed').textContent = orders.filter(o => o.status === 'completed').length;
+            document.getElementById('orders-progress').textContent = orders.filter(o => o.status === 'in_progress').length;
+            document.getElementById('orders-revenue').textContent = formatCurrency(orders.reduce((sum, o) => sum + parseFloat(o.revenue), 0));
+            
+            renderOrders();
+        }
+
+        function renderOrders() {
+            const container = document.getElementById('orders-list');
+            
+            if (orders.length === 0) {
+                container.innerHTML = '<tr><td colspan="9" class="text-center py-8 text-gray-500">لا توجد طلبات</td></tr>';
+                return;
+            }
+            
+            container.innerHTML = orders.map(order => {
+                const company = companies.find(c => c.id == order.companyId);
+                const driver = drivers.find(d => d.id == order.driverId);
+                return `
+                    <tr class="hover:bg-gray-50">
+                        <td class="p-3">#${order.id}</td>
+                        <td class="p-3">${formatDate(order.date)}</td>
+                        <td class="p-3">${company?.name || '-'}</td>
+                        <td class="p-3">${driver?.name || '-'}</td>
+                        <td class="p-3">${order.customer || '-'}<br><small class="text-gray-500">${order.postcode || ''}</small></td>
+                        <td class="p-3">${order.stops}</td>
+                        <td class="p-3 font-bold">${formatCurrency(order.revenue)}</td>
+                        <td class="p-3">
+                            <span class="badge ${order.status === 'completed' ? 'badge-success' : order.status === 'in_progress' ? 'badge-info' : 'badge-warning'}">
+                                ${order.status === 'completed' ? 'مكتمل' : order.status === 'in_progress' ? 'جاري' : 'قيد الانتظار'}
+                            </span>
+                        </td>
+                        <td class="p-3">
+                            <button onclick="updateOrderStatus(${order.id})" class="text-blue-600 hover:text-blue-800 ml-2">✓</button>
+                            <button onclick="deleteOrder(${order.id})" class="text-red-600 hover:text-red-800">🗑️</button>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        function openOrderModal() {
+            const modal = document.getElementById('order-modal');
+            const form = document.getElementById('order-form');
+            form.reset();
+            
+            // Populate companies
+            const companySelect = document.getElementById('order-company');
+            companySelect.innerHTML = '<option value="">اختر الشركة</option>' + 
+                companies.filter(c => c.status === 'active').map(c => 
+                    `<option value="${c.id}">${c.name}</option>`
+                ).join('');
+            
+            // Populate drivers
+            const driverSelect = document.getElementById('order-driver');
+            driverSelect.innerHTML = '<option value="">اختر السائق</option>' + 
+                drivers.filter(d => d.status === 'active').map(d => 
+                    `<option value="${d.id}">${d.name}</option>`
+                ).join('');
+            
+            document.getElementById('order-date').value = new Date().toISOString().split('T')[0];
+            document.getElementById('order-revenue-display').textContent = '£0.00';
+            
+            modal.classList.add('active');
+        }
+
+        function closeOrderModal() {
+            document.getElementById('order-modal').classList.remove('active');
+        }
+
+        function calculateOrderRevenue() {
+            const companyId = document.getElementById('order-company').value;
+            const stops = parseInt(document.getElementById('order-stops').value) || 1;
+            
+            if (!companyId) {
+                document.getElementById('order-revenue-display').textContent = '£0.00';
+                document.getElementById('company-info').classList.add('hidden');
+                return;
+            }
+            
+            const company = companies.find(c => c.id == companyId);
+            let revenue = 0;
+            
+            if (company.pricingType === 'per_order') {
+                revenue = company.price;
+            } else {
+                revenue = company.price * stops;
+            }
+            
+            document.getElementById('order-revenue-display').textContent = formatCurrency(revenue);
+            document.getElementById('pricing-info').textContent = 
+                `نوع التسعير: ${company.pricingType === 'per_order' ? 'لكل طلب' : 'لكل Stop'} | السعر: ${formatCurrency(company.price)}`;
+            document.getElementById('company-info').classList.remove('hidden');
+        }
+
+        function saveOrder(event) {
+            event.preventDefault();
+            
+            const companyId = parseInt(document.getElementById('order-company').value);
+            const driverId = parseInt(document.getElementById('order-driver').value);
+            const stops = parseInt(document.getElementById('order-stops').value);
+            const company = companies.find(c => c.id === companyId);
+            
+            let revenue = 0;
+            if (company.pricingType === 'per_order') {
+                revenue = company.price;
+            } else {
+                revenue = company.price * stops;
+            }
+            
+            const orderData = {
+                id: Date.now(),
+                companyId: companyId,
+                driverId: driverId,
+                date: document.getElementById('order-date').value,
+                postcode: document.getElementById('order-postcode').value,
+                customer: document.getElementById('order-customer').value,
+                phone: document.getElementById('order-phone').value,
+                stops: stops,
+                notes: document.getElementById('order-notes').value,
+                revenue: revenue,
+                status: 'pending'
+            };
+            
+            orders.push(orderData);
+            localStorage.setItem('orders', JSON.stringify(orders));
+            closeOrderModal();
+            loadOrders();
+        }
+
+        function updateOrderStatus(id) {
+            const order = orders.find(o => o.id === id);
+            if (order.status === 'pending') order.status = 'in_progress';
+            else if (order.status === 'in_progress') order.status = 'completed';
+            
+            localStorage.setItem('orders', JSON.stringify(orders));
+            loadOrders();
+        }
+
+        function deleteOrder(id) {
+            if (confirm('هل أنت متأكد من حذف هذا الطلب؟')) {
+                orders = orders.filter(o => o.id !== id);
+                localStorage.setItem('orders', JSON.stringify(orders));
+                loadOrders();
+            }
+        }
+
+        // Salary Functions
+        function loadSalaries() {
+            const totalSalaries = salaries.reduce((sum, s) => sum + parseFloat(s.finalSalary), 0);
+            const totalBonus = salaries.reduce((sum, s) => sum + parseFloat(s.bonus), 0);
+            const totalDeductions = salaries.reduce((sum, s) => sum + parseFloat(s.deductions), 0);
+            
+            document.getElementById('salaries-total').textContent = formatCurrency(totalSalaries);
+            document.getElementById('salaries-bonus').textContent = formatCurrency(totalBonus);
+            document.getElementById('salaries-deductions').textContent = formatCurrency(totalDeductions);
+            
+            renderSalaries();
+        }
+
+        function renderSalaries() {
+            const container = document.getElementById('salaries-list');
+            
+            if (salaries.length === 0) {
+                container.innerHTML = '<p class="text-center text-gray-500 py-8">لا توجد رواتب محسوبة. اضغط "حساب الرواتب الأسبوعية" لبدء الحساب.</p>';
+                return;
+            }
+            
+            container.innerHTML = salaries.map(salary => {
+                const driver = drivers.find(d => d.id == salary.driverId);
+                return `
+                    <div class="p-4 border rounded-lg">
+                        <div class="flex items-center justify-between mb-3">
+                            <div>
+                                <h3 class="font-semibold">${driver?.name || 'سائق'}</h3>
+                                <p class="text-sm text-gray-600">الأسبوع ${salary.week}</p>
+                            </div>
+                            <span class="badge badge-success">${salary.status === 'paid' ? 'مدفوع' : 'قيد الانتظار'}</span>
+                        </div>
+                        <div class="grid grid-cols-4 gap-4 text-center">
+                            <div>
+                                <p class="text-xs text-gray-600">الطلبات</p>
+                                <p class="font-bold">${salary.totalOrders}</p>
+                            </div>
+                            <div>
+                                <p class="text-xs text-gray-600">الراتب الأساسي</p>
+                                <p class="font-bold">${formatCurrency(salary.baseSalary)}</p>
+                            </div>
+                            <div>
+                                <p class="text-xs text-gray-600">البونص</p>
+                                <p class="font-bold text-green-600">${formatCurrency(salary.bonus)}</p>
+                            </div>
+                            <div>
+                                <p class="text-xs text-gray-600">الراتب النهائي</p>
+                                <p class="font-bold text-blue-600">${formatCurrency(salary.finalSalary)}</p>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function calculateWeeklySalaries() {
+            if (!confirm('هل تريد حساب رواتب جميع السائقين للأسبوع الحالي؟')) return;
+            
+            const currentWeek = 51;
+            salaries = [];
+            
+            drivers.forEach(driver => {
+                // حساب عدد الطلبات للسائق في الأسبوع الحالي
+                const driverOrders = orders.filter(o => o.driverId == driver.id).length;
+                
+                // فترة التدريب (أول أسبوعين)
+                const startDate = new Date(driver.startDate);
+                const now = new Date();
+                const diffDays = Math.floor((now - startDate) / (1000 * 60 * 60 * 24));
+                const isTraining = diffDays <= 14;
+                
+                let baseSalary = 0;
+                let bonus = 0;
+                let finalSalary = 0;
+                
+                if (isTraining) {
+                    // فترة التدريب = 0 راتب
+                    baseSalary = 0;
+                    bonus = 0;
+                    finalSalary = 0;
+                } else if (driverOrders < driver.requiredOrders) {
+                    // أقل من المطلوب = 0 (يحتاج قرار إداري)
+                    baseSalary = 0;
+                    bonus = 0;
+                    finalSalary = 0;
+                } else if (driverOrders >= driver.requiredOrders) {
+                    // حقق أو تجاوز المطلوب
+                    baseSalary = driver.salary;
+                    if (driverOrders > driver.requiredOrders) {
+                        bonus = driverOrders - driver.requiredOrders; // £1 لكل طلب إضافي
+                    }
+                    finalSalary = baseSalary + bonus;
+                }
+                
+                // خصم السلف
+                const driverAdvances = advances.filter(a => a.driverId == driver.id && a.status === 'active');
+                let deductions = 0;
+                driverAdvances.forEach(advance => {
+                    if (advance.paymentMethod === 'installments') {
+                        deductions += parseFloat(advance.installmentAmount);
+                    } else {
+                        deductions += parseFloat(advance.remaining);
+                    }
+                });
+                
+                finalSalary = Math.max(0, finalSalary - deductions);
+                
+                salaries.push({
+                    id: Date.now() + driver.id,
+                    driverId: driver.id,
+                    week: currentWeek,
+                    totalOrders: driverOrders,
+                    requiredOrders: driver.requiredOrders,
+                    baseSalary: baseSalary,
+                    bonus: bonus,
+                    deductions: deductions,
+                    finalSalary: finalSalary,
+                    isTraining: isTraining,
+                    status: 'pending'
+                });
+            });
+            
+            localStorage.setItem('salaries', JSON.stringify(salaries));
+            loadSalaries();
+            alert('تم حساب الرواتب بنجاح!');
+        }
+
+        // Advance Functions
+        function loadAdvances() {
+            const activeAdvances = advances.filter(a => a.status === 'active');
+            const totalAmount = advances.reduce((sum, a) => sum + parseFloat(a.amount), 0);
+            const totalRemaining = activeAdvances.reduce((sum, a) => sum + parseFloat(a.remaining), 0);
+            
+            document.getElementById('advances-active').textContent = activeAdvances.length;
+            document.getElementById('advances-total').textContent = formatCurrency(totalAmount);
+            document.getElementById('advances-remaining').textContent = formatCurrency(totalRemaining);
+            
+            renderAdvances();
+        }
+
+        function renderAdvances() {
+            const container = document.getElementById('advances-list');
+            
+            if (advances.length === 0) {
+                container.innerHTML = '<p class="text-center text-gray-500 py-8">لا توجد سلف</p>';
+                return;
+            }
+            
+            container.innerHTML = advances.map(advance => {
+                const driver = drivers.find(d => d.id == advance.driverId);
+                const progress = ((parseFloat(advance.amount) - parseFloat(advance.remaining)) / parseFloat(advance.amount)) * 100;
+                
+                return `
+                    <div class="p-4 border rounded-lg">
+                        <div class="flex items-center justify-between mb-3">
+                            <div>
+                                <h3 class="font-semibold">${driver?.name || 'سائق'}</h3>
+                                <p class="text-sm text-gray-600">${formatDate(advance.date)}</p>
+                            </div>
+                            <span class="badge ${advance.status === 'active' ? 'badge-warning' : 'badge-success'}">
+                                ${advance.status === 'active' ? 'نشط' : 'مدفوع'}
+                            </span>
+                        </div>
+                        <div class="grid grid-cols-3 gap-4 mb-3">
+                            <div>
+                                <p class="text-xs text-gray-600">المبلغ الكلي</p>
+                                <p class="font-bold">${formatCurrency(advance.amount)}</p>
+                            </div>
+                            <div>
+                                <p class="text-xs text-gray-600">المتبقي</p>
+                                <p class="font-bold text-red-600">${formatCurrency(advance.remaining)}</p>
+                            </div>
+                            <div>
+                                <p class="text-xs text-gray-600">الطريقة</p>
+                                <p class="text-sm">${advance.paymentMethod === 'installments' ? 'أقساط' : 'دفعة واحدة'}</p>
+                            </div>
+                        </div>
+                        <div class="w-full bg-gray-200 rounded-full h-2">
+                            <div class="bg-green-600 h-2 rounded-full" style="width: ${progress}%"></div>
+                        </div>
+                        <p class="text-xs text-gray-600 mt-2">${progress.toFixed(0)}% مدفوع</p>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function openAdvanceModal() {
+            const modal = document.getElementById('advance-modal');
+            const form = document.getElementById('advance-form');
+            form.reset();
+            
+            // Populate drivers
+            const driverSelect = document.getElementById('advance-driver');
+            driverSelect.innerHTML = '<option value="">اختر السائق</option>' + 
+                drivers.filter(d => d.status === 'active').map(d => 
+                    `<option value="${d.id}">${d.name}</option>`
+                ).join('');
+            
+            document.getElementById('advance-date').value = new Date().toISOString().split('T')[0];
+            document.getElementById('installments-fields').classList.add('hidden');
+            
+            modal.classList.add('active');
+        }
+
+        function closeAdvanceModal() {
+            document.getElementById('advance-modal').classList.remove('active');
+        }
+
+        function toggleInstallments() {
+            const method = document.getElementById('advance-payment-method').value;
+            const fields = document.getElementById('installments-fields');
+            
+            if (method === 'installments') {
+                fields.classList.remove('hidden');
+                document.getElementById('advance-installments').required = true;
+            } else {
+                fields.classList.add('hidden');
+                document.getElementById('advance-installments').required = false;
+            }
+            
+            calculateInstallmentAmount();
+        }
+
+        function calculateInstallmentAmount() {
+            const amount = parseFloat(document.getElementById('advance-amount').value) || 0;
+            const installments = parseInt(document.getElementById('advance-installments').value) || 1;
+            const installmentAmount = amount / installments;
+            
+            document.getElementById('advance-installment-amount').value = installmentAmount.toFixed(2);
+        }
+
+        // Listen to amount and installments changes
+        document.addEventListener('DOMContentLoaded', function() {
+            const amountInput = document.getElementById('advance-amount');
+            const installmentsInput = document.getElementById('advance-installments');
+            
+            if (amountInput) amountInput.addEventListener('input', calculateInstallmentAmount);
+            if (installmentsInput) installmentsInput.addEventListener('input', calculateInstallmentAmount);
+        });
+
+        function saveAdvance(event) {
+            event.preventDefault();
+            
+            const amount = parseFloat(document.getElementById('advance-amount').value);
+            const paymentMethod = document.getElementById('advance-payment-method').value;
+            
+            let installmentAmount = 0;
+            let installmentsCount = 1;
+            
+            if (paymentMethod === 'installments') {
+                installmentsCount = parseInt(document.getElementById('advance-installments').value);
+                installmentAmount = amount / installmentsCount;
+            }
+            
+            const advanceData = {
+                id: Date.now(),
+                driverId: parseInt(document.getElementById('advance-driver').value),
+                amount: amount,
+                remaining: amount,
+                date: document.getElementById('advance-date').value,
+                paymentMethod: paymentMethod,
+                installmentAmount: installmentAmount,
+                installmentsCount: installmentsCount,
+                installmentsPaid: 0,
+                notes: document.getElementById('advance-notes').value,
+                status: 'active'
+            };
+            
+            advances.push(advanceData);
+            localStorage.setItem('advances', JSON.stringify(advances));
+            closeAdvanceModal();
+            loadAdvances();
+        }
+
+        // Reports Functions
+        function loadReports() {
+            const totalRevenue = orders.reduce((sum, o) => sum + parseFloat(o.revenue), 0);
+            const totalSalaries = salaries.reduce((sum, s) => sum + parseFloat(s.finalSalary), 0);
+            const netProfit = totalRevenue - totalSalaries;
+            
+            document.getElementById('report-revenue').textContent = formatCurrency(totalRevenue);
+            document.getElementById('report-salaries').textContent = formatCurrency(totalSalaries);
+            document.getElementById('report-profit').textContent = formatCurrency(netProfit);
+            
+            // Driver Performance
+            const container = document.getElementById('driver-performance');
+            const driverStats = drivers.map(driver => {
+                const driverOrders = orders.filter(o => o.driverId == driver.id).length;
+                return { driver, orders: driverOrders };
+            }).sort((a, b) => b.orders - a.orders);
+            
+            container.innerHTML = driverStats.map((stat, index) => `
+                <div class="flex items-center justify-between p-2 ${index < 3 ? 'bg-yellow-50 rounded' : ''}">
+                    <span class="font-medium">${index + 1}. ${stat.driver.name}</span>
+                    <span class="font-bold">${stat.orders} طلب</span>
+                </div>
+            `).join('');
+        }
+
+        function downloadReport(type) {
+            const totalRevenue = orders.reduce((sum, o) => sum + parseFloat(o.revenue), 0);
+            const totalSalaries = salaries.reduce((sum, s) => sum + parseFloat(s.finalSalary), 0);
+            const netProfit = totalRevenue - totalSalaries;
+            
+            let reportContent = `تقرير ${type === 'weekly' ? 'أسبوعي' : 'شهري'}\n\n`;
+            reportContent += `=================================\n`;
+            reportContent += `إجمالي الإيرادات: ${formatCurrency(totalRevenue)}\n`;
+            reportContent += `إجمالي الرواتب: ${formatCurrency(totalSalaries)}\n`;
+            reportContent += `صافي الربح: ${formatCurrency(netProfit)}\n`;
+            reportContent += `=================================\n\n`;
+            
+            reportContent += `تفاصيل السائقين:\n`;
+            drivers.forEach(driver => {
+                const driverOrders = orders.filter(o => o.driverId == driver.id).length;
+                const driverRevenue = orders.filter(o => o.driverId == driver.id).reduce((sum, o) => sum + parseFloat(o.revenue), 0);
+                reportContent += `- ${driver.name}: ${driverOrders} طلب، إيرادات: ${formatCurrency(driverRevenue)}\n`;
+            });
+            
+            // Create downloadable text file
+            const blob = new Blob([reportContent], { type: 'text/plain;charset=utf-8' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `report_${type}_${new Date().toISOString().split('T')[0]}.txt`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            window.URL.revokeObjectURL(url);
+        }
+
+        // Initialize
+        showPage('dashboard');
+    </script>
+</body>
+</html>
