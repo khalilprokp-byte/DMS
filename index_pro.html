@@ -658,7 +658,229 @@
         </div>
     </div>
 
-    <!-- Modals will be added in the JavaScript section -->
+    <!-- Driver Modal -->
+    <div id="driver-modal" class="modal">
+        <div class="modal-content w-full max-w-2xl p-8">
+            <div class="flex justify-between items-center mb-6 pb-4 border-b-2">
+                <h2 class="text-3xl font-bold text-gray-800">
+                    <span id="driver-modal-title">➕ إضافة سائق جديد</span>
+                </h2>
+                <button onclick="closeDriverModal()" class="text-3xl text-gray-500 hover:text-red-600 transition">×</button>
+            </div>
+            <form id="driver-form" onsubmit="saveDriver(event)">
+                <input type="hidden" id="driver-id">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-bold mb-2 text-gray-700">الاسم الكامل *</label>
+                        <input type="text" id="driver-name" class="input" required placeholder="أحمد علي محمد">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-bold mb-2 text-gray-700">رقم الهاتف *</label>
+                        <input type="tel" id="driver-phone" class="input" required placeholder="+447700900123">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-bold mb-2 text-gray-700">واتساب</label>
+                        <input type="tel" id="driver-whatsapp" class="input" placeholder="+447700900123">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-bold mb-2 text-gray-700">تاريخ البدء *</label>
+                        <input type="date" id="driver-start-date" class="input" required>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-bold mb-2 text-gray-700">الحالة *</label>
+                        <select id="driver-status" class="input" required>
+                            <option value="training">🎓 تحت التدريب</option>
+                            <option value="active">✅ نشط</option>
+                            <option value="suspended">⛔ موقوف</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-bold mb-2 text-gray-700">الراتب الأساسي (£) *</label>
+                        <input type="number" id="driver-salary" class="input" required value="120" min="0" step="0.01">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-bold mb-2 text-gray-700">الطلبات المطلوبة/أسبوع *</label>
+                        <input type="number" id="driver-orders" class="input" required value="100" min="0">
+                    </div>
+                </div>
+                <div class="mt-4">
+                    <label class="block text-sm font-bold mb-2 text-gray-700">ملاحظات</label>
+                    <textarea id="driver-notes" class="input" rows="3" placeholder="أي ملاحظات إضافية..."></textarea>
+                </div>
+                <div class="flex gap-3 mt-6">
+                    <button type="submit" class="btn btn-success flex-1">💾 حفظ</button>
+                    <button type="button" onclick="closeDriverModal()" class="btn btn-secondary flex-1">❌ إلغاء</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Company Modal -->
+    <div id="company-modal" class="modal">
+        <div class="modal-content w-full max-w-2xl p-8">
+            <div class="flex justify-between items-center mb-6 pb-4 border-b-2">
+                <h2 class="text-3xl font-bold text-gray-800">
+                    <span id="company-modal-title">🏢 إضافة شركة جديدة</span>
+                </h2>
+                <button onclick="closeCompanyModal()" class="text-3xl text-gray-500 hover:text-red-600 transition">×</button>
+            </div>
+            <form id="company-form" onsubmit="saveCompany(event)">
+                <input type="hidden" id="company-id">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-bold mb-2 text-gray-700">اسم الشركة *</label>
+                        <input type="text" id="company-name" class="input" required placeholder="Company A Ltd">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-bold mb-2 text-gray-700">جهة الاتصال *</label>
+                        <input type="text" id="company-contact" class="input" required placeholder="Jane Doe">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-bold mb-2 text-gray-700">رقم الهاتف *</label>
+                        <input type="tel" id="company-phone" class="input" required placeholder="+447700900888">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-bold mb-2 text-gray-700">البريد الإلكتروني *</label>
+                        <input type="email" id="company-email" class="input" required placeholder="contact@company.com">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-bold mb-2 text-gray-700">الحالة *</label>
+                        <select id="company-status" class="input" required>
+                            <option value="active">✅ نشطة</option>
+                            <option value="inactive">⏸️ متوقفة</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="mt-4">
+                    <label class="block text-sm font-bold mb-2 text-gray-700">ملاحظات</label>
+                    <textarea id="company-notes" class="input" rows="3" placeholder="تعليمات خاصة، مواعيد التوصيل، إلخ..."></textarea>
+                </div>
+                <div class="flex gap-3 mt-6">
+                    <button type="submit" class="btn btn-success flex-1">💾 حفظ</button>
+                    <button type="button" onclick="closeCompanyModal()" class="btn btn-secondary flex-1">❌ إلغاء</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Order Modal -->
+    <div id="order-modal" class="modal">
+        <div class="modal-content w-full max-w-2xl p-8">
+            <div class="flex justify-between items-center mb-6 pb-4 border-b-2">
+                <h2 class="text-3xl font-bold text-gray-800">
+                    <span id="order-modal-title">📦 إضافة طلب جديد</span>
+                </h2>
+                <button onclick="closeOrderModal()" class="text-3xl text-gray-500 hover:text-red-600 transition">×</button>
+            </div>
+            <form id="order-form" onsubmit="saveOrder(event)">
+                <input type="hidden" id="order-id">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-bold mb-2 text-gray-700">الشركة *</label>
+                        <select id="order-company" class="input" required>
+                            <option value="">-- اختر الشركة --</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-bold mb-2 text-gray-700">السائق *</label>
+                        <select id="order-driver" class="input" required>
+                            <option value="">-- اختر السائق --</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-bold mb-2 text-gray-700">التاريخ *</label>
+                        <input type="date" id="order-date" class="input" required>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-bold mb-2 text-gray-700">الرمز البريدي</label>
+                        <input type="text" id="order-postcode" class="input" placeholder="SW1A 1AA">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-bold mb-2 text-gray-700">اسم العميل</label>
+                        <input type="text" id="order-customer" class="input" placeholder="John Smith">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-bold mb-2 text-gray-700">رقم هاتف العميل</label>
+                        <input type="tel" id="order-customer-phone" class="input" placeholder="+447700900001">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-bold mb-2 text-gray-700">الإيرادات (£) *</label>
+                        <input type="number" id="order-revenue" class="input" required min="0" step="0.01" placeholder="15.00">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-bold mb-2 text-gray-700">الحالة *</label>
+                        <select id="order-status" class="input" required>
+                            <option value="pending">⏳ قيد الانتظار</option>
+                            <option value="in_progress">🔄 جاري التنفيذ</option>
+                            <option value="completed">✅ مكتمل</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="mt-4">
+                    <label class="block text-sm font-bold mb-2 text-gray-700">ملاحظات</label>
+                    <textarea id="order-notes" class="input" rows="2" placeholder="ملاحظات إضافية..."></textarea>
+                </div>
+                <div class="flex gap-3 mt-6">
+                    <button type="submit" class="btn btn-success flex-1">💾 حفظ</button>
+                    <button type="button" onclick="closeOrderModal()" class="btn btn-secondary flex-1">❌ إلغاء</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Advance Modal -->
+    <div id="advance-modal" class="modal">
+        <div class="modal-content w-full max-w-2xl p-8">
+            <div class="flex justify-between items-center mb-6 pb-4 border-b-2">
+                <h2 class="text-3xl font-bold text-gray-800">
+                    <span id="advance-modal-title">💳 إضافة سلفة جديدة</span>
+                </h2>
+                <button onclick="closeAdvanceModal()" class="text-3xl text-gray-500 hover:text-red-600 transition">×</button>
+            </div>
+            <form id="advance-form" onsubmit="saveAdvance(event)">
+                <input type="hidden" id="advance-id">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-bold mb-2 text-gray-700">السائق *</label>
+                        <select id="advance-driver" class="input" required>
+                            <option value="">-- اختر السائق --</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-bold mb-2 text-gray-700">المبلغ (£) *</label>
+                        <input type="number" id="advance-amount" class="input" required min="0" step="0.01" placeholder="100.00">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-bold mb-2 text-gray-700">التاريخ *</label>
+                        <input type="date" id="advance-date" class="input" required>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-bold mb-2 text-gray-700">طريقة الدفع *</label>
+                        <select id="advance-payment-method" class="input" required onchange="toggleInstallments()">
+                            <option value="one_time">💵 دفعة واحدة</option>
+                            <option value="installments">📊 أقساط</option>
+                        </select>
+                    </div>
+                    <div id="installment-section" class="hidden">
+                        <label class="block text-sm font-bold mb-2 text-gray-700">عدد الأقساط</label>
+                        <input type="number" id="advance-installments" class="input" min="2" value="4" onchange="calculateInstallmentAmount()">
+                    </div>
+                    <div id="installment-amount-section" class="hidden">
+                        <label class="block text-sm font-bold mb-2 text-gray-700">قيمة القسط (£)</label>
+                        <input type="number" id="advance-installment-amount" class="input" readonly>
+                    </div>
+                </div>
+                <div class="mt-4">
+                    <label class="block text-sm font-bold mb-2 text-gray-700">سبب السلفة</label>
+                    <textarea id="advance-reason" class="input" rows="2" placeholder="سبب السلفة..."></textarea>
+                </div>
+                <div class="flex gap-3 mt-6">
+                    <button type="submit" class="btn btn-success flex-1">💾 حفظ</button>
+                    <button type="button" onclick="closeAdvanceModal()" class="btn btn-secondary flex-1">❌ إلغاء</button>
+                </div>
+            </form>
+        </div>
+    </div>
 
     <script>
         // Data Storage
@@ -871,7 +1093,7 @@
                         <p class="text-xs text-gray-500 mt-2">${company.notes || 'لا توجد ملاحظات'}</p>
                     </div>
                     <div class="flex gap-2">
-                        <button onclick="alert('تعديل - قريباً')" class="btn btn-primary flex-1 text-sm">✏️ تعديل</button>
+                        <button onclick="editCompany(${company.id})" class="btn btn-primary flex-1 text-sm">✏️ تعديل</button>
                         <button onclick="deleteCompany(${company.id})" class="btn btn-danger flex-1 text-sm">🗑️ حذف</button>
                     </div>
                 </div>
@@ -925,6 +1147,7 @@
                             </span>
                         </td>
                         <td class="p-4">
+                            <button onclick="editOrder(${order.id})" class="p-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition mr-2">✏️</button>
                             <button onclick="updateOrderStatus(${order.id})" class="p-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition mr-2">✓</button>
                             <button onclick="deleteOrder(${order.id})" class="p-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition">🗑️</button>
                         </td>
@@ -1187,21 +1410,314 @@
             window.URL.revokeObjectURL(url);
         }
 
-        // Modal placeholder functions
-        function openDriverModal() {
-            alert('📝 نموذج إضافة سائق - سيتم إضافته قريباً');
+        // Driver Modal Functions
+        function openDriverModal(driverId = null) {
+            const modal = document.getElementById('driver-modal');
+            const form = document.getElementById('driver-form');
+            form.reset();
+            
+            if (driverId) {
+                const driver = drivers.find(d => d.id === driverId);
+                if (driver) {
+                    document.getElementById('driver-modal-title').textContent = '✏️ تعديل بيانات السائق';
+                    document.getElementById('driver-id').value = driver.id;
+                    document.getElementById('driver-name').value = driver.name;
+                    document.getElementById('driver-phone').value = driver.phone;
+                    document.getElementById('driver-whatsapp').value = driver.whatsapp || driver.phone;
+                    document.getElementById('driver-start-date').value = driver.startDate;
+                    document.getElementById('driver-status').value = driver.status;
+                    document.getElementById('driver-salary').value = driver.salary;
+                    document.getElementById('driver-orders').value = driver.requiredOrders;
+                    document.getElementById('driver-notes').value = driver.notes || '';
+                }
+            } else {
+                document.getElementById('driver-modal-title').textContent = '➕ إضافة سائق جديد';
+                const today = new Date().toISOString().split('T')[0];
+                document.getElementById('driver-start-date').value = today;
+            }
+            
+            modal.classList.add('active');
         }
 
-        function openCompanyModal() {
-            alert('🏢 نموذج إضافة شركة - سيتم إضافته قريباً');
+        function closeDriverModal() {
+            document.getElementById('driver-modal').classList.remove('active');
         }
 
-        function openOrderModal() {
-            alert('📦 نموذج إضافة طلب مع تسعير يدوي - سيتم إضافته قريباً');
+        function saveDriver(event) {
+            event.preventDefault();
+            
+            const id = document.getElementById('driver-id').value;
+            const driverData = {
+                id: id ? parseInt(id) : Date.now(),
+                name: document.getElementById('driver-name').value,
+                phone: document.getElementById('driver-phone').value,
+                whatsapp: document.getElementById('driver-whatsapp').value || document.getElementById('driver-phone').value,
+                startDate: document.getElementById('driver-start-date').value,
+                status: document.getElementById('driver-status').value,
+                salary: parseFloat(document.getElementById('driver-salary').value),
+                requiredOrders: parseInt(document.getElementById('driver-orders').value),
+                notes: document.getElementById('driver-notes').value
+            };
+            
+            if (id) {
+                const index = drivers.findIndex(d => d.id === parseInt(id));
+                drivers[index] = driverData;
+            } else {
+                drivers.push(driverData);
+            }
+            
+            localStorage.setItem('drivers_pro', JSON.stringify(drivers));
+            closeDriverModal();
+            loadDrivers();
+            alert('✅ تم حفظ بيانات السائق بنجاح!');
         }
 
-        function openAdvanceModal() {
-            alert('💳 نموذج إضافة سلفة - سيتم إضافته قريباً');
+        function editDriver(id) {
+            openDriverModal(id);
+        }
+
+        // Company Modal Functions
+        function openCompanyModal(companyId = null) {
+            const modal = document.getElementById('company-modal');
+            const form = document.getElementById('company-form');
+            form.reset();
+            
+            if (companyId) {
+                const company = companies.find(c => c.id === companyId);
+                if (company) {
+                    document.getElementById('company-modal-title').textContent = '✏️ تعديل بيانات الشركة';
+                    document.getElementById('company-id').value = company.id;
+                    document.getElementById('company-name').value = company.name;
+                    document.getElementById('company-contact').value = company.contact;
+                    document.getElementById('company-phone').value = company.phone;
+                    document.getElementById('company-email').value = company.email;
+                    document.getElementById('company-status').value = company.status;
+                    document.getElementById('company-notes').value = company.notes || '';
+                }
+            } else {
+                document.getElementById('company-modal-title').textContent = '🏢 إضافة شركة جديدة';
+            }
+            
+            modal.classList.add('active');
+        }
+
+        function closeCompanyModal() {
+            document.getElementById('company-modal').classList.remove('active');
+        }
+
+        function saveCompany(event) {
+            event.preventDefault();
+            
+            const id = document.getElementById('company-id').value;
+            const companyData = {
+                id: id ? parseInt(id) : Date.now(),
+                name: document.getElementById('company-name').value,
+                contact: document.getElementById('company-contact').value,
+                phone: document.getElementById('company-phone').value,
+                email: document.getElementById('company-email').value,
+                status: document.getElementById('company-status').value,
+                notes: document.getElementById('company-notes').value
+            };
+            
+            if (id) {
+                const index = companies.findIndex(c => c.id === parseInt(id));
+                companies[index] = companyData;
+            } else {
+                companies.push(companyData);
+            }
+            
+            localStorage.setItem('companies_pro', JSON.stringify(companies));
+            closeCompanyModal();
+            loadCompanies();
+            alert('✅ تم حفظ بيانات الشركة بنجاح!');
+        }
+
+        function editCompany(id) {
+            openCompanyModal(id);
+        }
+
+        // Order Modal Functions
+        function openOrderModal(orderId = null) {
+            const modal = document.getElementById('order-modal');
+            const form = document.getElementById('order-form');
+            form.reset();
+            
+            // Populate company dropdown
+            const companySelect = document.getElementById('order-company');
+            companySelect.innerHTML = '<option value="">-- اختر الشركة --</option>' + 
+                companies.filter(c => c.status === 'active').map(c => 
+                    `<option value="${c.id}">${c.name}</option>`
+                ).join('');
+            
+            // Populate driver dropdown
+            const driverSelect = document.getElementById('order-driver');
+            driverSelect.innerHTML = '<option value="">-- اختر السائق --</option>' + 
+                drivers.filter(d => d.status === 'active' || d.status === 'training').map(d => 
+                    `<option value="${d.id}">${d.name}</option>`
+                ).join('');
+            
+            if (orderId) {
+                const order = orders.find(o => o.id === orderId);
+                if (order) {
+                    document.getElementById('order-modal-title').textContent = '✏️ تعديل الطلب';
+                    document.getElementById('order-id').value = order.id;
+                    document.getElementById('order-company').value = order.companyId;
+                    document.getElementById('order-driver').value = order.driverId;
+                    document.getElementById('order-date').value = order.date;
+                    document.getElementById('order-postcode').value = order.postcode || '';
+                    document.getElementById('order-customer').value = order.customer || '';
+                    document.getElementById('order-customer-phone').value = order.phone || '';
+                    document.getElementById('order-revenue').value = order.revenue;
+                    document.getElementById('order-status').value = order.status;
+                    document.getElementById('order-notes').value = order.notes || '';
+                }
+            } else {
+                document.getElementById('order-modal-title').textContent = '📦 إضافة طلب جديد';
+                const today = new Date().toISOString().split('T')[0];
+                document.getElementById('order-date').value = today;
+            }
+            
+            modal.classList.add('active');
+        }
+
+        function closeOrderModal() {
+            document.getElementById('order-modal').classList.remove('active');
+        }
+
+        function saveOrder(event) {
+            event.preventDefault();
+            
+            const id = document.getElementById('order-id').value;
+            const orderData = {
+                id: id ? parseInt(id) : Date.now(),
+                companyId: parseInt(document.getElementById('order-company').value),
+                driverId: parseInt(document.getElementById('order-driver').value),
+                date: document.getElementById('order-date').value,
+                postcode: document.getElementById('order-postcode').value,
+                customer: document.getElementById('order-customer').value,
+                phone: document.getElementById('order-customer-phone').value,
+                revenue: parseFloat(document.getElementById('order-revenue').value),
+                status: document.getElementById('order-status').value,
+                notes: document.getElementById('order-notes').value
+            };
+            
+            if (id) {
+                const index = orders.findIndex(o => o.id === parseInt(id));
+                orders[index] = orderData;
+            } else {
+                orders.push(orderData);
+            }
+            
+            localStorage.setItem('orders_pro', JSON.stringify(orders));
+            closeOrderModal();
+            loadOrders();
+            loadDashboard();
+            alert('✅ تم حفظ الطلب بنجاح!');
+        }
+
+        function editOrder(id) {
+            openOrderModal(id);
+        }
+
+        // Advance Modal Functions
+        function openAdvanceModal(advanceId = null) {
+            const modal = document.getElementById('advance-modal');
+            const form = document.getElementById('advance-form');
+            form.reset();
+            
+            // Populate driver dropdown
+            const driverSelect = document.getElementById('advance-driver');
+            driverSelect.innerHTML = '<option value="">-- اختر السائق --</option>' + 
+                drivers.filter(d => d.status === 'active').map(d => 
+                    `<option value="${d.id}">${d.name}</option>`
+                ).join('');
+            
+            if (advanceId) {
+                const advance = advances.find(a => a.id === advanceId);
+                if (advance) {
+                    document.getElementById('advance-modal-title').textContent = '✏️ تعديل السلفة';
+                    document.getElementById('advance-id').value = advance.id;
+                    document.getElementById('advance-driver').value = advance.driverId;
+                    document.getElementById('advance-amount').value = advance.amount;
+                    document.getElementById('advance-date').value = advance.date;
+                    document.getElementById('advance-payment-method').value = advance.paymentMethod;
+                    document.getElementById('advance-reason').value = advance.reason || '';
+                    
+                    if (advance.paymentMethod === 'installments') {
+                        document.getElementById('advance-installments').value = advance.installments || 4;
+                        toggleInstallments();
+                        calculateInstallmentAmount();
+                    }
+                }
+            } else {
+                document.getElementById('advance-modal-title').textContent = '💳 إضافة سلفة جديدة';
+                const today = new Date().toISOString().split('T')[0];
+                document.getElementById('advance-date').value = today;
+            }
+            
+            modal.classList.add('active');
+        }
+
+        function closeAdvanceModal() {
+            document.getElementById('advance-modal').classList.remove('active');
+        }
+
+        function toggleInstallments() {
+            const method = document.getElementById('advance-payment-method').value;
+            const installmentSection = document.getElementById('installment-section');
+            const installmentAmountSection = document.getElementById('installment-amount-section');
+            
+            if (method === 'installments') {
+                installmentSection.classList.remove('hidden');
+                installmentAmountSection.classList.remove('hidden');
+                calculateInstallmentAmount();
+            } else {
+                installmentSection.classList.add('hidden');
+                installmentAmountSection.classList.add('hidden');
+            }
+        }
+
+        function calculateInstallmentAmount() {
+            const amount = parseFloat(document.getElementById('advance-amount').value) || 0;
+            const installments = parseInt(document.getElementById('advance-installments').value) || 1;
+            const installmentAmount = amount / installments;
+            document.getElementById('advance-installment-amount').value = installmentAmount.toFixed(2);
+        }
+
+        function saveAdvance(event) {
+            event.preventDefault();
+            
+            const id = document.getElementById('advance-id').value;
+            const amount = parseFloat(document.getElementById('advance-amount').value);
+            const paymentMethod = document.getElementById('advance-payment-method').value;
+            
+            const advanceData = {
+                id: id ? parseInt(id) : Date.now(),
+                driverId: parseInt(document.getElementById('advance-driver').value),
+                amount: amount,
+                remaining: amount,
+                date: document.getElementById('advance-date').value,
+                paymentMethod: paymentMethod,
+                reason: document.getElementById('advance-reason').value,
+                status: 'active'
+            };
+            
+            if (paymentMethod === 'installments') {
+                advanceData.installments = parseInt(document.getElementById('advance-installments').value);
+                advanceData.installmentAmount = parseFloat(document.getElementById('advance-installment-amount').value);
+            }
+            
+            if (id) {
+                const index = advances.findIndex(a => a.id === parseInt(id));
+                advances[index] = advanceData;
+            } else {
+                advances.push(advanceData);
+            }
+            
+            localStorage.setItem('advances_pro', JSON.stringify(advances));
+            closeAdvanceModal();
+            loadAdvances();
+            alert('✅ تم حفظ السلفة بنجاح!');
         }
         
         // Initialize
