@@ -1,0 +1,1211 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>نظام إدارة السائقين - Professional Edition</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700&display=swap');
+        
+        * { 
+            font-family: 'Cairo', 'Segoe UI', sans-serif; 
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+        }
+        
+        .sidebar { 
+            width: 280px; 
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            background: linear-gradient(180deg, #1e3c72 0%, #2a5298 100%);
+            box-shadow: 4px 0 12px rgba(0,0,0,0.1);
+        }
+        
+        .main-content { 
+            margin-right: 280px; 
+            transition: all 0.3s;
+        }
+        
+        @media (max-width: 768px) {
+            .sidebar { 
+                transform: translateX(100%); 
+                position: fixed; 
+                right: 0; 
+                z-index: 50; 
+                height: 100vh; 
+            }
+            .sidebar.open { transform: translateX(0); }
+            .main-content { margin-right: 0; }
+        }
+        
+        .card { 
+            background: white; 
+            border-radius: 16px; 
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08); 
+            padding: 1.75rem; 
+            transition: all 0.3s;
+            border: 1px solid rgba(0,0,0,0.05);
+        }
+        
+        .card:hover {
+            box-shadow: 0 8px 30px rgba(0,0,0,0.12);
+            transform: translateY(-2px);
+        }
+        
+        .stat-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+        }
+        
+        .stat-card-green {
+            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+        }
+        
+        .stat-card-blue {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        }
+        
+        .stat-card-orange {
+            background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+        }
+        
+        .btn { 
+            padding: 0.75rem 1.5rem; 
+            border-radius: 10px; 
+            font-weight: 600; 
+            cursor: pointer; 
+            transition: all 0.3s;
+            border: none;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(0,0,0,0.2);
+        }
+        
+        .btn-primary { 
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white; 
+        }
+        
+        .btn-success { 
+            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+            color: white; 
+        }
+        
+        .btn-danger { 
+            background: linear-gradient(135deg, #eb3349 0%, #f45c43 100%);
+            color: white; 
+        }
+        
+        .btn-secondary { 
+            background: linear-gradient(135deg, #868f96 0%, #596164 100%);
+            color: white; 
+        }
+        
+        .badge { 
+            padding: 0.35rem 0.85rem; 
+            border-radius: 20px; 
+            font-size: 0.75rem; 
+            font-weight: 600;
+            letter-spacing: 0.5px;
+        }
+        
+        .badge-success { background: #d1fae5; color: #065f46; }
+        .badge-warning { background: #fef3c7; color: #92400e; }
+        .badge-danger { background: #fee2e2; color: #991b1b; }
+        .badge-info { background: #dbeafe; color: #1e40af; }
+        
+        .input { 
+            width: 100%; 
+            padding: 0.75rem 1.25rem; 
+            border: 2px solid #e5e7eb; 
+            border-radius: 10px;
+            transition: all 0.3s;
+            font-size: 0.95rem;
+        }
+        
+        .input:focus { 
+            outline: none; 
+            border-color: #667eea; 
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+        
+        .modal { 
+            display: none; 
+            position: fixed; 
+            inset: 0; 
+            background: rgba(0,0,0,0.6); 
+            z-index: 100; 
+            align-items: center; 
+            justify-content: center;
+            backdrop-filter: blur(4px);
+        }
+        
+        .modal.active { display: flex; }
+        
+        .modal-content { 
+            background: white; 
+            border-radius: 20px; 
+            max-width: 90%; 
+            max-height: 90vh; 
+            overflow-y: auto;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        
+        .hidden { display: none !important; }
+        
+        .nav-item {
+            color: rgba(255,255,255,0.8);
+            transition: all 0.3s;
+            border-radius: 10px;
+        }
+        
+        .nav-item:hover {
+            background: rgba(255,255,255,0.1);
+            color: white;
+        }
+        
+        .nav-item.active {
+            background: rgba(255,255,255,0.2);
+            color: white;
+        }
+        
+        .table-row {
+            transition: all 0.2s;
+        }
+        
+        .table-row:hover {
+            background: #f9fafb;
+            transform: scale(1.01);
+        }
+        
+        .page-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 2rem;
+            border-radius: 16px;
+            margin-bottom: 2rem;
+            box-shadow: 0 8px 24px rgba(102, 126, 234, 0.3);
+        }
+        
+        .stat-icon {
+            font-size: 3.5rem;
+            opacity: 0.9;
+        }
+        
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 10px;
+        }
+        
+        ::-webkit-scrollbar-thumb:hover {
+            background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+        }
+    </style>
+</head>
+<body>
+    <!-- Sidebar -->
+    <div id="sidebar" class="sidebar fixed top-0 bottom-0 right-0">
+        <div class="p-6 border-b border-white border-opacity-20">
+            <h1 class="text-2xl font-bold text-white">نظام إدارة السائقين</h1>
+            <p class="text-sm text-white text-opacity-70 mt-1">Professional Edition</p>
+        </div>
+        <nav class="p-4">
+            <a href="#" onclick="showPage('dashboard')" class="nav-item active flex items-center gap-3 p-3 mb-2" data-page="dashboard">
+                <span class="text-2xl">📊</span> 
+                <span class="text-base">لوحة التحكم</span>
+            </a>
+            <a href="#" onclick="showPage('drivers')" class="nav-item flex items-center gap-3 p-3 mb-2" data-page="drivers">
+                <span class="text-2xl">👥</span> 
+                <span class="text-base">السائقين</span>
+            </a>
+            <a href="#" onclick="showPage('companies')" class="nav-item flex items-center gap-3 p-3 mb-2" data-page="companies">
+                <span class="text-2xl">🏢</span> 
+                <span class="text-base">الشركات</span>
+            </a>
+            <a href="#" onclick="showPage('orders')" class="nav-item flex items-center gap-3 p-3 mb-2" data-page="orders">
+                <span class="text-2xl">📦</span> 
+                <span class="text-base">الطلبات</span>
+            </a>
+            <a href="#" onclick="showPage('salaries')" class="nav-item flex items-center gap-3 p-3 mb-2" data-page="salaries">
+                <span class="text-2xl">💰</span> 
+                <span class="text-base">الرواتب</span>
+            </a>
+            <a href="#" onclick="showPage('advances')" class="nav-item flex items-center gap-3 p-3 mb-2" data-page="advances">
+                <span class="text-2xl">💳</span> 
+                <span class="text-base">السلف</span>
+            </a>
+            <a href="#" onclick="showPage('reports')" class="nav-item flex items-center gap-3 p-3 mb-2" data-page="reports">
+                <span class="text-2xl">📄</span> 
+                <span class="text-base">التقارير</span>
+            </a>
+        </nav>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <!-- Header -->
+        <div class="bg-white shadow-sm p-5 flex items-center justify-between sticky top-0 z-40">
+            <button onclick="toggleSidebar()" class="md:hidden p-2 hover:bg-gray-100 rounded-lg transition">
+                <span class="text-2xl">☰</span>
+            </button>
+            <div class="flex items-center gap-6">
+                <div class="text-right">
+                    <p class="text-sm font-semibold text-gray-800">الأسبوع 51، 2024</p>
+                    <p class="text-xs text-gray-500">ديسمبر 24، 2024</p>
+                </div>
+                <div class="flex items-center gap-2 bg-gradient-to-r from-purple-500 to-indigo-600 text-white px-4 py-2 rounded-full">
+                    <span class="text-sm font-semibold">Admin</span>
+                    <span class="text-lg">👤</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Pages Container -->
+        <div id="pages-container" class="p-8">
+            
+            <!-- Dashboard Page -->
+            <div id="dashboard-page" class="page">
+                <div class="page-header">
+                    <h2 class="text-4xl font-bold mb-2">لوحة التحكم</h2>
+                    <p class="text-lg opacity-90">نظرة شاملة على أداء النظام</p>
+                </div>
+                
+                <!-- Main Stats Cards -->
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                    <div class="card stat-card">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-sm opacity-90 mb-1">إجمالي الإيرادات</p>
+                                <p class="text-3xl font-bold" id="total-revenue">£0</p>
+                                <p class="text-xs opacity-75 mt-2">من جميع الطلبات</p>
+                            </div>
+                            <span class="stat-icon">💰</span>
+                        </div>
+                    </div>
+                    
+                    <div class="card stat-card-green">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-sm opacity-90 mb-1">مجموع الرواتب</p>
+                                <p class="text-3xl font-bold" id="total-salaries">£0</p>
+                                <p class="text-xs opacity-75 mt-2">المدفوعة هذا الأسبوع</p>
+                            </div>
+                            <span class="stat-icon">💵</span>
+                        </div>
+                    </div>
+                    
+                    <div class="card stat-card-blue">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-sm opacity-90 mb-1">صافي الربح</p>
+                                <p class="text-3xl font-bold" id="net-profit">£0</p>
+                                <p class="text-xs opacity-75 mt-2">الإيرادات - الرواتب</p>
+                            </div>
+                            <span class="stat-icon">📈</span>
+                        </div>
+                    </div>
+                    
+                    <div class="card stat-card-orange">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-sm opacity-90 mb-1">إجمالي الطلبات</p>
+                                <p class="text-3xl font-bold" id="total-orders">0</p>
+                                <p class="text-xs opacity-75 mt-2">جميع الطلبات المسجلة</p>
+                            </div>
+                            <span class="stat-icon">📦</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Secondary Stats -->
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                    <div class="card bg-green-50 border-2 border-green-200">
+                        <div class="flex items-center gap-4">
+                            <div class="text-4xl">✅</div>
+                            <div>
+                                <p class="text-sm text-green-700 font-semibold">سائقين نشطين</p>
+                                <p class="text-3xl font-bold text-green-800" id="active-drivers">0</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="card bg-yellow-50 border-2 border-yellow-200">
+                        <div class="flex items-center gap-4">
+                            <div class="text-4xl">🎓</div>
+                            <div>
+                                <p class="text-sm text-yellow-700 font-semibold">تحت التدريب</p>
+                                <p class="text-3xl font-bold text-yellow-800" id="training-drivers">0</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="card bg-blue-50 border-2 border-blue-200">
+                        <div class="flex items-center gap-4">
+                            <div class="text-4xl">🏢</div>
+                            <div>
+                                <p class="text-sm text-blue-700 font-semibold">شركات نشطة</p>
+                                <p class="text-3xl font-bold text-blue-800" id="active-companies">0</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="card bg-purple-50 border-2 border-purple-200">
+                        <div class="flex items-center gap-4">
+                            <div class="text-4xl">✓</div>
+                            <div>
+                                <p class="text-sm text-purple-700 font-semibold">طلبات مكتملة</p>
+                                <p class="text-3xl font-bold text-purple-800" id="completed-orders">0</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Recent Activity & Quick Stats -->
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <div class="card">
+                        <h3 class="text-xl font-bold mb-4 pb-3 border-b-2 border-gray-100">آخر النشاطات</h3>
+                        <div id="recent-activity" class="space-y-3"></div>
+                    </div>
+                    
+                    <div class="card">
+                        <h3 class="text-xl font-bold mb-4 pb-3 border-b-2 border-gray-100">ملخص سريع</h3>
+                        <div class="space-y-4">
+                            <div class="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
+                                <span class="font-semibold text-gray-700">متوسط الإيرادات/طلب</span>
+                                <span class="text-xl font-bold text-blue-600" id="avg-revenue">£0</span>
+                            </div>
+                            <div class="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
+                                <span class="font-semibold text-gray-700">متوسط الطلبات/سائق</span>
+                                <span class="text-xl font-bold text-green-600" id="avg-orders">0</span>
+                            </div>
+                            <div class="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
+                                <span class="font-semibold text-gray-700">هامش الربح</span>
+                                <span class="text-xl font-bold text-purple-600" id="profit-margin">0%</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Drivers Page -->
+            <div id="drivers-page" class="page hidden">
+                <div class="page-header">
+                    <div class="flex justify-between items-center">
+                        <div>
+                            <h2 class="text-4xl font-bold mb-2">إدارة السائقين</h2>
+                            <p class="text-lg opacity-90">إدارة وتتبع جميع السائقين</p>
+                        </div>
+                        <button onclick="openDriverModal()" class="btn btn-success text-lg">
+                            ➕ إضافة سائق جديد
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Driver Stats -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+                    <div class="card bg-gradient-to-br from-green-400 to-green-600 text-white">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-sm opacity-90">نشطين</p>
+                                <p class="text-4xl font-bold" id="drivers-active">0</p>
+                            </div>
+                            <span class="text-5xl opacity-80">✅</span>
+                        </div>
+                    </div>
+                    <div class="card bg-gradient-to-br from-yellow-400 to-yellow-600 text-white">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-sm opacity-90">تدريب</p>
+                                <p class="text-4xl font-bold" id="drivers-training">0</p>
+                            </div>
+                            <span class="text-5xl opacity-80">🎓</span>
+                        </div>
+                    </div>
+                    <div class="card bg-gradient-to-br from-red-400 to-red-600 text-white">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-sm opacity-90">موقوفين</p>
+                                <p class="text-4xl font-bold" id="drivers-suspended">0</p>
+                            </div>
+                            <span class="text-5xl opacity-80">⛔</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Search -->
+                <div class="card mb-6 bg-gradient-to-r from-blue-50 to-purple-50">
+                    <div class="flex items-center gap-3">
+                        <span class="text-2xl">🔍</span>
+                        <input type="text" id="driver-search" placeholder="ابحث عن سائق بالاسم أو رقم الهاتف..." class="input flex-1 bg-white" onkeyup="filterDrivers()">
+                    </div>
+                </div>
+
+                <!-- Drivers List -->
+                <div class="card">
+                    <h3 class="text-xl font-bold mb-4 pb-3 border-b-2">قائمة السائقين</h3>
+                    <div id="drivers-list" class="space-y-4"></div>
+                </div>
+            </div>
+
+            <!-- Companies Page -->
+            <div id="companies-page" class="page hidden">
+                <div class="page-header">
+                    <div class="flex justify-between items-center">
+                        <div>
+                            <h2 class="text-4xl font-bold mb-2">إدارة الشركات</h2>
+                            <p class="text-lg opacity-90">إدارة الشركات المتعاقدة</p>
+                        </div>
+                        <button onclick="openCompanyModal()" class="btn btn-success text-lg">
+                            ➕ إضافة شركة جديدة
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Companies List -->
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="companies-list"></div>
+            </div>
+
+            <!-- Orders Page -->
+            <div id="orders-page" class="page hidden">
+                <div class="page-header">
+                    <div class="flex justify-between items-center">
+                        <div>
+                            <h2 class="text-4xl font-bold mb-2">إدارة الطلبات</h2>
+                            <p class="text-lg opacity-90">تتبع وإدارة جميع الطلبات</p>
+                        </div>
+                        <button onclick="openOrderModal()" class="btn btn-success text-lg">
+                            ➕ طلب جديد
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Order Stats -->
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
+                    <div class="card bg-gradient-to-br from-blue-400 to-blue-600 text-white">
+                        <p class="text-sm opacity-90">إجمالي الطلبات</p>
+                        <p class="text-4xl font-bold" id="orders-total">0</p>
+                    </div>
+                    <div class="card bg-gradient-to-br from-green-400 to-green-600 text-white">
+                        <p class="text-sm opacity-90">مكتملة</p>
+                        <p class="text-4xl font-bold" id="orders-completed">0</p>
+                    </div>
+                    <div class="card bg-gradient-to-br from-yellow-400 to-yellow-600 text-white">
+                        <p class="text-sm opacity-90">قيد التنفيذ</p>
+                        <p class="text-4xl font-bold" id="orders-progress">0</p>
+                    </div>
+                    <div class="card bg-gradient-to-br from-purple-400 to-purple-600 text-white">
+                        <p class="text-sm opacity-90">الإيرادات</p>
+                        <p class="text-4xl font-bold" id="orders-revenue">£0</p>
+                    </div>
+                </div>
+
+                <!-- Orders Table -->
+                <div class="card overflow-x-auto">
+                    <table class="w-full">
+                        <thead class="bg-gradient-to-r from-blue-500 to-purple-600 text-white">
+                            <tr>
+                                <th class="p-4 text-right font-bold">رقم الطلب</th>
+                                <th class="p-4 text-right font-bold">التاريخ</th>
+                                <th class="p-4 text-right font-bold">الشركة</th>
+                                <th class="p-4 text-right font-bold">السائق</th>
+                                <th class="p-4 text-right font-bold">العميل</th>
+                                <th class="p-4 text-right font-bold">الإيرادات</th>
+                                <th class="p-4 text-right font-bold">الحالة</th>
+                                <th class="p-4 text-right font-bold">إجراءات</th>
+                            </tr>
+                        </thead>
+                        <tbody id="orders-list"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Salaries Page -->
+            <div id="salaries-page" class="page hidden">
+                <div class="page-header">
+                    <div class="flex justify-between items-center">
+                        <div>
+                            <h2 class="text-4xl font-bold mb-2">إدارة الرواتب</h2>
+                            <p class="text-lg opacity-90">حساب وإدارة رواتب السائقين</p>
+                        </div>
+                        <button onclick="calculateWeeklySalaries()" class="btn btn-success text-lg">
+                            🧮 حساب الرواتب الأسبوعية
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Salary Summary -->
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
+                    <div class="card bg-gradient-to-br from-indigo-400 to-indigo-600 text-white">
+                        <p class="text-sm opacity-90">الأسبوع الحالي</p>
+                        <p class="text-3xl font-bold">الأسبوع 51</p>
+                    </div>
+                    <div class="card bg-gradient-to-br from-green-400 to-green-600 text-white">
+                        <p class="text-sm opacity-90">إجمالي الرواتب</p>
+                        <p class="text-3xl font-bold" id="salaries-total">£0</p>
+                    </div>
+                    <div class="card bg-gradient-to-br from-yellow-400 to-yellow-600 text-white">
+                        <p class="text-sm opacity-90">البونص</p>
+                        <p class="text-3xl font-bold" id="salaries-bonus">£0</p>
+                    </div>
+                    <div class="card bg-gradient-to-br from-red-400 to-red-600 text-white">
+                        <p class="text-sm opacity-90">الخصومات</p>
+                        <p class="text-3xl font-bold" id="salaries-deductions">£0</p>
+                    </div>
+                </div>
+
+                <!-- Salaries List -->
+                <div class="card">
+                    <h3 class="text-xl font-bold mb-4 pb-3 border-b-2">تفاصيل الرواتب</h3>
+                    <div id="salaries-list" class="space-y-4"></div>
+                </div>
+            </div>
+
+            <!-- Advances Page -->
+            <div id="advances-page" class="page hidden">
+                <div class="page-header">
+                    <div class="flex justify-between items-center">
+                        <div>
+                            <h2 class="text-4xl font-bold mb-2">إدارة السلف</h2>
+                            <p class="text-lg opacity-90">تتبع وإدارة السلف والقروض</p>
+                        </div>
+                        <button onclick="openAdvanceModal()" class="btn btn-success text-lg">
+                            ➕ إضافة سلفة جديدة
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Advance Stats -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+                    <div class="card bg-gradient-to-br from-orange-400 to-orange-600 text-white">
+                        <p class="text-sm opacity-90">سلف نشطة</p>
+                        <p class="text-4xl font-bold" id="advances-active">0</p>
+                    </div>
+                    <div class="card bg-gradient-to-br from-red-400 to-red-600 text-white">
+                        <p class="text-sm opacity-90">المبلغ الإجمالي</p>
+                        <p class="text-4xl font-bold" id="advances-total">£0</p>
+                    </div>
+                    <div class="card bg-gradient-to-br from-yellow-400 to-yellow-600 text-white">
+                        <p class="text-sm opacity-90">المتبقي</p>
+                        <p class="text-4xl font-bold" id="advances-remaining">£0</p>
+                    </div>
+                </div>
+
+                <!-- Advances List -->
+                <div class="card">
+                    <h3 class="text-xl font-bold mb-4 pb-3 border-b-2">قائمة السلف</h3>
+                    <div id="advances-list" class="space-y-4"></div>
+                </div>
+            </div>
+
+            <!-- Reports Page -->
+            <div id="reports-page" class="page hidden">
+                <div class="page-header">
+                    <h2 class="text-4xl font-bold mb-2">التقارير والإحصائيات</h2>
+                    <p class="text-lg opacity-90">تقارير مفصلة عن الأداء</p>
+                </div>
+                
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <!-- Weekly Report -->
+                    <div class="card bg-gradient-to-br from-blue-50 to-purple-50">
+                        <h3 class="text-2xl font-bold mb-4 pb-3 border-b-2">تقرير أسبوعي</h3>
+                        <div class="space-y-4">
+                            <div class="flex justify-between items-center p-4 bg-white rounded-lg shadow">
+                                <span class="font-bold text-gray-700">الإيرادات:</span>
+                                <span class="text-2xl font-bold text-green-600" id="report-revenue">£0</span>
+                            </div>
+                            <div class="flex justify-between items-center p-4 bg-white rounded-lg shadow">
+                                <span class="font-bold text-gray-700">الرواتب:</span>
+                                <span class="text-2xl font-bold text-red-600" id="report-salaries">£0</span>
+                            </div>
+                            <div class="flex justify-between items-center p-4 bg-gradient-to-r from-green-400 to-green-600 text-white rounded-lg shadow-lg">
+                                <span class="font-bold">صافي الربح:</span>
+                                <span class="text-3xl font-bold" id="report-profit">£0</span>
+                            </div>
+                        </div>
+                        <button onclick="downloadReport('weekly')" class="btn btn-primary w-full mt-6">
+                            📥 تحميل التقرير
+                        </button>
+                    </div>
+
+                    <!-- Driver Performance -->
+                    <div class="card bg-gradient-to-br from-green-50 to-blue-50">
+                        <h3 class="text-2xl font-bold mb-4 pb-3 border-b-2">أداء السائقين</h3>
+                        <div id="driver-performance" class="space-y-3"></div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Modals will be added in the JavaScript section -->
+
+    <script>
+        // Data Storage
+        let drivers = JSON.parse(localStorage.getItem('drivers_pro') || '[]');
+        let companies = JSON.parse(localStorage.getItem('companies_pro') || '[]');
+        let orders = JSON.parse(localStorage.getItem('orders_pro') || '[]');
+        let salaries = JSON.parse(localStorage.getItem('salaries_pro') || '[]');
+        let advances = JSON.parse(localStorage.getItem('advances_pro') || '[]');
+
+        // Initialize with sample data if empty
+        if (drivers.length === 0) {
+            drivers = [
+                {id: 1001, name: 'أحمد علي محمد', phone: '+447700900123', whatsapp: '+447700900123', startDate: '2024-01-15', status: 'active', salary: 120, requiredOrders: 100, notes: 'سائق ممتاز'},
+                {id: 1002, name: 'محمد حسن إبراهيم', phone: '+447700900124', whatsapp: '+447700900124', startDate: '2024-12-10', status: 'training', salary: 120, requiredOrders: 100, notes: ''},
+                {id: 1003, name: 'خالد إبراهيم أحمد', phone: '+447700900125', whatsapp: '+447700900125', startDate: '2024-02-01', status: 'active', salary: 120, requiredOrders: 100, notes: 'موثوق'}
+            ];
+            localStorage.setItem('drivers_pro', JSON.stringify(drivers));
+        }
+
+        if (companies.length === 0) {
+            companies = [
+                {id: 2001, name: 'Company A Ltd', contact: 'Jane Doe', phone: '+447700900888', email: 'jane@companya.com', status: 'active', notes: 'Always ring bell twice'},
+                {id: 2002, name: 'Express Delivery Co', contact: 'John Smith', phone: '+447700900777', email: 'john@express.com', status: 'active', notes: 'Call before delivery'}
+            ];
+            localStorage.setItem('companies_pro', JSON.stringify(companies));
+        }
+        
+        if (orders.length === 0) {
+            orders = [
+                {id: 3001, companyId: 2001, driverId: 1001, date: '2024-12-20', postcode: 'SW1A 1AA', customer: 'John Smith', phone: '+447700900001', revenue: 15, notes: '', status: 'completed'},
+                {id: 3002, companyId: 2002, driverId: 1001, date: '2024-12-20', postcode: 'SW1A 2AA', customer: 'Mary Johnson', phone: '+447700900002', revenue: 25, notes: '', status: 'completed'},
+                {id: 3003, companyId: 2001, driverId: 1003, date: '2024-12-21', postcode: 'W1A 1AA', customer: 'David Brown', phone: '+447700900003', revenue: 15, notes: '', status: 'in_progress'}
+            ];
+            localStorage.setItem('orders_pro', JSON.stringify(orders));
+        }
+
+        // Helper Functions
+        function formatCurrency(amount) {
+            return '£' + parseFloat(amount).toFixed(2);
+        }
+
+        function formatDate(dateStr) {
+            const date = new Date(dateStr);
+            return date.toLocaleDateString('ar-SA');
+        }
+
+        function toggleSidebar() {
+            document.getElementById('sidebar').classList.toggle('open');
+        }
+
+        function showPage(pageName) {
+            // Hide all pages
+            document.querySelectorAll('.page').forEach(page => page.classList.add('hidden'));
+            document.getElementById(pageName + '-page').classList.remove('hidden');
+            
+            // Update active nav
+            document.querySelectorAll('.nav-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            document.querySelector(`[data-page="${pageName}"]`).classList.add('active');
+            
+            // Load page data
+            if (pageName === 'dashboard') loadDashboard();
+            else if (pageName === 'drivers') loadDrivers();
+            else if (pageName === 'companies') loadCompanies();
+            else if (pageName === 'orders') loadOrders();
+            else if (pageName === 'salaries') loadSalaries();
+            else if (pageName === 'advances') loadAdvances();
+            else if (pageName === 'reports') loadReports();
+
+            // Close sidebar on mobile
+            if (window.innerWidth < 768) {
+                document.getElementById('sidebar').classList.remove('open');
+            }
+        }
+
+        // Dashboard Functions
+        function loadDashboard() {
+            const totalRevenue = orders.reduce((sum, o) => sum + parseFloat(o.revenue), 0);
+            const totalSalaries = salaries.reduce((sum, s) => sum + parseFloat(s.finalSalary || 0), 0);
+            const netProfit = totalRevenue - totalSalaries;
+            
+            document.getElementById('total-revenue').textContent = formatCurrency(totalRevenue);
+            document.getElementById('total-salaries').textContent = formatCurrency(totalSalaries);
+            document.getElementById('net-profit').textContent = formatCurrency(netProfit);
+            document.getElementById('total-orders').textContent = orders.length;
+            
+            document.getElementById('active-drivers').textContent = drivers.filter(d => d.status === 'active').length;
+            document.getElementById('training-drivers').textContent = drivers.filter(d => d.status === 'training').length;
+            document.getElementById('active-companies').textContent = companies.filter(c => c.status === 'active').length;
+            document.getElementById('completed-orders').textContent = orders.filter(o => o.status === 'completed').length;
+
+            // Quick stats
+            const avgRevenue = orders.length > 0 ? totalRevenue / orders.length : 0;
+            const avgOrders = drivers.length > 0 ? orders.length / drivers.filter(d => d.status === 'active').length : 0;
+            const profitMargin = totalRevenue > 0 ? ((netProfit / totalRevenue) * 100) : 0;
+            
+            document.getElementById('avg-revenue').textContent = formatCurrency(avgRevenue);
+            document.getElementById('avg-orders').textContent = avgOrders.toFixed(1);
+            document.getElementById('profit-margin').textContent = profitMargin.toFixed(1) + '%';
+
+            loadRecentActivity();
+        }
+
+        function loadRecentActivity() {
+            const container = document.getElementById('recent-activity');
+            const recent = orders.slice(-5).reverse();
+            
+            if (recent.length === 0) {
+                container.innerHTML = '<p class="text-center text-gray-500 py-8">لا توجد نشاطات حديثة</p>';
+                return;
+            }
+            
+            container.innerHTML = recent.map(order => {
+                const driver = drivers.find(d => d.id == order.driverId);
+                const company = companies.find(c => c.id == order.companyId);
+                return `
+                    <div class="flex items-start gap-3 p-3 bg-gradient-to-r from-green-50 to-blue-50 rounded-lg border-l-4 border-green-500 hover:shadow-md transition">
+                        <span class="text-green-500 text-2xl">✓</span>
+                        <div class="flex-1">
+                            <p class="text-sm font-semibold text-gray-800">طلب من ${company?.name || 'شركة'} تم تعيينه لـ ${driver?.name || 'سائق'}</p>
+                            <p class="text-xs text-gray-500 mt-1">📅 ${formatDate(order.date)} | 💰 ${formatCurrency(order.revenue)}</p>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // Driver Functions
+        function loadDrivers() {
+            document.getElementById('drivers-active').textContent = drivers.filter(d => d.status === 'active').length;
+            document.getElementById('drivers-training').textContent = drivers.filter(d => d.status === 'training').length;
+            document.getElementById('drivers-suspended').textContent = drivers.filter(d => d.status === 'suspended').length;
+            renderDrivers();
+        }
+
+        function renderDrivers(filteredDrivers = drivers) {
+            const container = document.getElementById('drivers-list');
+            
+            if (filteredDrivers.length === 0) {
+                container.innerHTML = '<p class="text-center text-gray-500 py-8">لا يوجد سائقين</p>';
+                return;
+            }
+            
+            container.innerHTML = filteredDrivers.map(driver => `
+                <div class="p-5 border-2 border-gray-100 rounded-xl hover:shadow-xl transition-all hover:border-blue-300 bg-gradient-to-r from-white to-gray-50">
+                    <div class="flex items-center justify-between">
+                        <div class="flex-1">
+                            <h3 class="font-bold text-xl text-gray-800 mb-2">${driver.name}</h3>
+                            <div class="grid grid-cols-2 gap-3">
+                                <p class="text-sm text-gray-600">📱 ${driver.phone}</p>
+                                <p class="text-sm text-gray-600">📅 ${formatDate(driver.startDate)}</p>
+                                <p class="text-sm text-gray-600">💰 ${formatCurrency(driver.salary)}</p>
+                                <p class="text-sm text-gray-600">📦 ${driver.requiredOrders} طلب/أسبوع</p>
+                            </div>
+                        </div>
+                        <div class="text-left space-y-3">
+                            <span class="badge ${driver.status === 'active' ? 'badge-success' : driver.status === 'training' ? 'badge-warning' : 'badge-danger'} text-sm">
+                                ${driver.status === 'active' ? '✅ نشط' : driver.status === 'training' ? '🎓 تدريب' : '⛔ موقوف'}
+                            </span>
+                            <div class="flex gap-2">
+                                <button onclick="editDriver(${driver.id})" class="p-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition">✏️</button>
+                                <button onclick="deleteDriver(${driver.id})" class="p-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition">🗑️</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function filterDrivers() {
+            const search = document.getElementById('driver-search').value.toLowerCase();
+            const filtered = drivers.filter(d => 
+                d.name.toLowerCase().includes(search) || 
+                d.phone.includes(search)
+            );
+            renderDrivers(filtered);
+        }
+
+        function editDriver(id) {
+            alert('تعديل السائق - قريباً');
+        }
+
+        function deleteDriver(id) {
+            if (confirm('هل أنت متأكد من حذف هذا السائق؟')) {
+                drivers = drivers.filter(d => d.id !== id);
+                localStorage.setItem('drivers_pro', JSON.stringify(drivers));
+                loadDrivers();
+            }
+        }
+
+        // Company Functions
+        function loadCompanies() {
+            const container = document.getElementById('companies-list');
+            
+            container.innerHTML = companies.map(company => `
+                <div class="card bg-gradient-to-br from-white to-blue-50 border-2 border-blue-100 hover:shadow-2xl transition-all">
+                    <div class="flex items-start justify-between mb-4">
+                        <div>
+                            <h3 class="font-bold text-xl text-gray-800">${company.name}</h3>
+                            <p class="text-sm text-gray-600 mt-1">👤 ${company.contact}</p>
+                        </div>
+                        <span class="badge ${company.status === 'active' ? 'badge-success' : 'badge-warning'} text-sm">
+                            ${company.status === 'active' ? '✅ نشطة' : '⏸️ متوقفة'}
+                        </span>
+                    </div>
+                    <div class="space-y-2 mb-4 bg-white p-3 rounded-lg">
+                        <p class="text-sm">📧 ${company.email}</p>
+                        <p class="text-sm">📱 ${company.phone}</p>
+                        <p class="text-xs text-gray-500 mt-2">${company.notes || 'لا توجد ملاحظات'}</p>
+                    </div>
+                    <div class="flex gap-2">
+                        <button onclick="alert('تعديل - قريباً')" class="btn btn-primary flex-1 text-sm">✏️ تعديل</button>
+                        <button onclick="deleteCompany(${company.id})" class="btn btn-danger flex-1 text-sm">🗑️ حذف</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function deleteCompany(id) {
+            if (confirm('هل أنت متأكد من حذف هذه الشركة؟')) {
+                companies = companies.filter(c => c.id !== id);
+                localStorage.setItem('companies_pro', JSON.stringify(companies));
+                loadCompanies();
+            }
+        }
+
+        // Order Functions with MANUAL PRICING
+        function loadOrders() {
+            document.getElementById('orders-total').textContent = orders.length;
+            document.getElementById('orders-completed').textContent = orders.filter(o => o.status === 'completed').length;
+            document.getElementById('orders-progress').textContent = orders.filter(o => o.status === 'in_progress').length;
+            document.getElementById('orders-revenue').textContent = formatCurrency(orders.reduce((sum, o) => sum + parseFloat(o.revenue), 0));
+            
+            renderOrders();
+        }
+
+        function renderOrders() {
+            const container = document.getElementById('orders-list');
+            
+            if (orders.length === 0) {
+                container.innerHTML = '<tr><td colspan="8" class="text-center py-8 text-gray-500">لا توجد طلبات</td></tr>';
+                return;
+            }
+            
+            container.innerHTML = orders.map((order, index) => {
+                const company = companies.find(c => c.id == order.companyId);
+                const driver = drivers.find(d => d.id == order.driverId);
+                const bgColor = index % 2 === 0 ? 'bg-white' : 'bg-gray-50';
+                return `
+                    <tr class="table-row ${bgColor} border-b border-gray-200">
+                        <td class="p-4 font-bold text-blue-600">#${order.id}</td>
+                        <td class="p-4">${formatDate(order.date)}</td>
+                        <td class="p-4 font-semibold">${company?.name || '-'}</td>
+                        <td class="p-4 font-semibold">${driver?.name || '-'}</td>
+                        <td class="p-4">
+                            <div>${order.customer || '-'}</div>
+                            <small class="text-gray-500">${order.postcode || ''}</small>
+                        </td>
+                        <td class="p-4 font-bold text-green-600 text-lg">${formatCurrency(order.revenue)}</td>
+                        <td class="p-4">
+                            <span class="badge ${order.status === 'completed' ? 'badge-success' : order.status === 'in_progress' ? 'badge-info' : 'badge-warning'}">
+                                ${order.status === 'completed' ? '✅ مكتمل' : order.status === 'in_progress' ? '🔄 جاري' : '⏳ قيد الانتظار'}
+                            </span>
+                        </td>
+                        <td class="p-4">
+                            <button onclick="updateOrderStatus(${order.id})" class="p-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition mr-2">✓</button>
+                            <button onclick="deleteOrder(${order.id})" class="p-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition">🗑️</button>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        function updateOrderStatus(id) {
+            const order = orders.find(o => o.id === id);
+            if (order.status === 'pending') order.status = 'in_progress';
+            else if (order.status === 'in_progress') order.status = 'completed';
+            
+            localStorage.setItem('orders_pro', JSON.stringify(orders));
+            loadOrders();
+        }
+
+        function deleteOrder(id) {
+            if (confirm('هل أنت متأكد من حذف هذا الطلب؟')) {
+                orders = orders.filter(o => o.id !== id);
+                localStorage.setItem('orders_pro', JSON.stringify(orders));
+                loadOrders();
+            }
+        }
+
+        // Salary Functions
+        function loadSalaries() {
+            const totalSalaries = salaries.reduce((sum, s) => sum + parseFloat(s.finalSalary || 0), 0);
+            const totalBonus = salaries.reduce((sum, s) => sum + parseFloat(s.bonus || 0), 0);
+            const totalDeductions = salaries.reduce((sum, s) => sum + parseFloat(s.deductions || 0), 0);
+            
+            document.getElementById('salaries-total').textContent = formatCurrency(totalSalaries);
+            document.getElementById('salaries-bonus').textContent = formatCurrency(totalBonus);
+            document.getElementById('salaries-deductions').textContent = formatCurrency(totalDeductions);
+            
+            renderSalaries();
+        }
+
+        function renderSalaries() {
+            const container = document.getElementById('salaries-list');
+            
+            if (salaries.length === 0) {
+                container.innerHTML = '<p class="text-center text-gray-500 py-8">لا توجد رواتب محسوبة. اضغط "حساب الرواتب الأسبوعية" لبدء الحساب.</p>';
+                return;
+            }
+            
+            container.innerHTML = salaries.map(salary => {
+                const driver = drivers.find(d => d.id == salary.driverId);
+                return `
+                    <div class="p-5 border-2 border-gray-100 rounded-xl bg-gradient-to-r from-white to-green-50 hover:shadow-lg transition">
+                        <div class="flex items-center justify-between mb-4">
+                            <div>
+                                <h3 class="font-bold text-xl">${driver?.name || 'سائق'}</h3>
+                                <p class="text-sm text-gray-600">الأسبوع ${salary.week}</p>
+                            </div>
+                            <span class="badge badge-success text-sm">${salary.status === 'paid' ? '✅ مدفوع' : '⏳ قيد الانتظار'}</span>
+                        </div>
+                        <div class="grid grid-cols-4 gap-4 text-center bg-white p-4 rounded-lg">
+                            <div>
+                                <p class="text-xs text-gray-600 mb-1">الطلبات</p>
+                                <p class="font-bold text-lg">${salary.totalOrders}</p>
+                            </div>
+                            <div>
+                                <p class="text-xs text-gray-600 mb-1">الراتب الأساسي</p>
+                                <p class="font-bold text-lg">${formatCurrency(salary.baseSalary)}</p>
+                            </div>
+                            <div>
+                                <p class="text-xs text-gray-600 mb-1">البونص</p>
+                                <p class="font-bold text-lg text-green-600">${formatCurrency(salary.bonus)}</p>
+                            </div>
+                            <div>
+                                <p class="text-xs text-gray-600 mb-1">الراتب النهائي</p>
+                                <p class="font-bold text-xl text-blue-600">${formatCurrency(salary.finalSalary)}</p>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function calculateWeeklySalaries() {
+            if (!confirm('هل تريد حساب رواتب جميع السائقين للأسبوع الحالي؟')) return;
+            
+            const currentWeek = 51;
+            salaries = [];
+            
+            drivers.forEach(driver => {
+                const driverOrders = orders.filter(o => o.driverId == driver.id).length;
+                
+                const startDate = new Date(driver.startDate);
+                const now = new Date();
+                const diffDays = Math.floor((now - startDate) / (1000 * 60 * 60 * 24));
+                const isTraining = diffDays <= 14;
+                
+                let baseSalary = 0;
+                let bonus = 0;
+                let finalSalary = 0;
+                
+                if (isTraining) {
+                    baseSalary = 0;
+                    bonus = 0;
+                    finalSalary = 0;
+                } else if (driverOrders < driver.requiredOrders) {
+                    baseSalary = 0;
+                    bonus = 0;
+                    finalSalary = 0;
+                } else if (driverOrders >= driver.requiredOrders) {
+                    baseSalary = driver.salary;
+                    if (driverOrders > driver.requiredOrders) {
+                        bonus = driverOrders - driver.requiredOrders;
+                    }
+                    finalSalary = baseSalary + bonus;
+                }
+                
+                const driverAdvances = advances.filter(a => a.driverId == driver.id && a.status === 'active');
+                let deductions = 0;
+                driverAdvances.forEach(advance => {
+                    if (advance.paymentMethod === 'installments') {
+                        deductions += parseFloat(advance.installmentAmount || 0);
+                    } else {
+                        deductions += parseFloat(advance.remaining || 0);
+                    }
+                });
+                
+                finalSalary = Math.max(0, finalSalary - deductions);
+                
+                salaries.push({
+                    id: Date.now() + driver.id,
+                    driverId: driver.id,
+                    week: currentWeek,
+                    totalOrders: driverOrders,
+                    requiredOrders: driver.requiredOrders,
+                    baseSalary: baseSalary,
+                    bonus: bonus,
+                    deductions: deductions,
+                    finalSalary: finalSalary,
+                    isTraining: isTraining,
+                    status: 'pending'
+                });
+            });
+            
+            localStorage.setItem('salaries_pro', JSON.stringify(salaries));
+            loadSalaries();
+            alert('✅ تم حساب الرواتب بنجاح!');
+        }
+
+        // Advance Functions
+        function loadAdvances() {
+            const activeAdvances = advances.filter(a => a.status === 'active');
+            const totalAmount = advances.reduce((sum, a) => sum + parseFloat(a.amount || 0), 0);
+            const totalRemaining = activeAdvances.reduce((sum, a) => sum + parseFloat(a.remaining || 0), 0);
+            
+            document.getElementById('advances-active').textContent = activeAdvances.length;
+            document.getElementById('advances-total').textContent = formatCurrency(totalAmount);
+            document.getElementById('advances-remaining').textContent = formatCurrency(totalRemaining);
+            
+            renderAdvances();
+        }
+
+        function renderAdvances() {
+            const container = document.getElementById('advances-list');
+            
+            if (advances.length === 0) {
+                container.innerHTML = '<p class="text-center text-gray-500 py-8">لا توجد سلف</p>';
+                return;
+            }
+            
+            container.innerHTML = advances.map(advance => {
+                const driver = drivers.find(d => d.id == advance.driverId);
+                const progress = ((parseFloat(advance.amount) - parseFloat(advance.remaining)) / parseFloat(advance.amount)) * 100;
+                
+                return `
+                    <div class="p-5 border-2 border-gray-100 rounded-xl bg-gradient-to-r from-white to-orange-50 hover:shadow-lg transition">
+                        <div class="flex items-center justify-between mb-4">
+                            <div>
+                                <h3 class="font-bold text-xl">${driver?.name || 'سائق'}</h3>
+                                <p class="text-sm text-gray-600">📅 ${formatDate(advance.date)}</p>
+                            </div>
+                            <span class="badge ${advance.status === 'active' ? 'badge-warning' : 'badge-success'} text-sm">
+                                ${advance.status === 'active' ? '⏳ نشط' : '✅ مدفوع'}
+                            </span>
+                        </div>
+                        <div class="grid grid-cols-3 gap-4 mb-4 bg-white p-4 rounded-lg">
+                            <div>
+                                <p class="text-xs text-gray-600 mb-1">المبلغ الكلي</p>
+                                <p class="font-bold text-lg">${formatCurrency(advance.amount)}</p>
+                            </div>
+                            <div>
+                                <p class="text-xs text-gray-600 mb-1">المتبقي</p>
+                                <p class="font-bold text-lg text-red-600">${formatCurrency(advance.remaining)}</p>
+                            </div>
+                            <div>
+                                <p class="text-xs text-gray-600 mb-1">الطريقة</p>
+                                <p class="text-sm font-semibold">${advance.paymentMethod === 'installments' ? '📊 أقساط' : '💵 دفعة واحدة'}</p>
+                            </div>
+                        </div>
+                        <div class="w-full bg-gray-200 rounded-full h-3 overflow-hidden">
+                            <div class="bg-gradient-to-r from-green-400 to-green-600 h-3 rounded-full transition-all duration-500" style="width: ${progress}%"></div>
+                        </div>
+                        <p class="text-xs text-gray-600 mt-2 text-center font-semibold">${progress.toFixed(0)}% مدفوع</p>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // Reports Functions
+        function loadReports() {
+            const totalRevenue = orders.reduce((sum, o) => sum + parseFloat(o.revenue), 0);
+            const totalSalaries = salaries.reduce((sum, s) => sum + parseFloat(s.finalSalary || 0), 0);
+            const netProfit = totalRevenue - totalSalaries;
+            
+            document.getElementById('report-revenue').textContent = formatCurrency(totalRevenue);
+            document.getElementById('report-salaries').textContent = formatCurrency(totalSalaries);
+            document.getElementById('report-profit').textContent = formatCurrency(netProfit);
+            
+            const container = document.getElementById('driver-performance');
+            const driverStats = drivers.map(driver => {
+                const driverOrders = orders.filter(o => o.driverId == driver.id).length;
+                return { driver, orders: driverOrders };
+            }).sort((a, b) => b.orders - a.orders);
+            
+            container.innerHTML = driverStats.map((stat, index) => `
+                <div class="flex items-center justify-between p-4 ${index < 3 ? 'bg-gradient-to-r from-yellow-100 to-yellow-200' : 'bg-white'} rounded-lg shadow border-2 ${index < 3 ? 'border-yellow-400' : 'border-gray-200'} hover:shadow-lg transition">
+                    <div class="flex items-center gap-3">
+                        <span class="text-2xl font-bold ${index < 3 ? 'text-yellow-600' : 'text-gray-600'}">${index + 1}</span>
+                        <span class="font-semibold text-gray-800">${stat.driver.name}</span>
+                    </div>
+                    <span class="font-bold text-xl ${index < 3 ? 'text-yellow-700' : 'text-gray-700'}">${stat.orders} طلب</span>
+                </div>
+            `).join('');
+        }
+
+        function downloadReport(type) {
+            const totalRevenue = orders.reduce((sum, o) => sum + parseFloat(o.revenue), 0);
+            const totalSalaries = salaries.reduce((sum, s) => sum + parseFloat(s.finalSalary || 0), 0);
+            const netProfit = totalRevenue - totalSalaries;
+            
+            let reportContent = `تقرير ${type === 'weekly' ? 'أسبوعي' : 'شهري'}\n\n`;
+            reportContent += `=================================\n`;
+            reportContent += `إجمالي الإيرادات: ${formatCurrency(totalRevenue)}\n`;
+            reportContent += `إجمالي الرواتب: ${formatCurrency(totalSalaries)}\n`;
+            reportContent += `صافي الربح: ${formatCurrency(netProfit)}\n`;
+            reportContent += `=================================\n\n`;
+            
+            reportContent += `تفاصيل السائقين:\n`;
+            drivers.forEach(driver => {
+                const driverOrders = orders.filter(o => o.driverId == driver.id).length;
+                const driverRevenue = orders.filter(o => o.driverId == driver.id).reduce((sum, o) => sum + parseFloat(o.revenue), 0);
+                reportContent += `- ${driver.name}: ${driverOrders} طلب، إيرادات: ${formatCurrency(driverRevenue)}\n`;
+            });
+            
+            const blob = new Blob([reportContent], { type: 'text/plain;charset=utf-8' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `report_${type}_${new Date().toISOString().split('T')[0]}.txt`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            window.URL.revokeObjectURL(url);
+        }
+
+        // Modal placeholder functions
+        function openDriverModal() {
+            alert('📝 نموذج إضافة سائق - سيتم إضافته قريباً');
+        }
+
+        function openCompanyModal() {
+            alert('🏢 نموذج إضافة شركة - سيتم إضافته قريباً');
+        }
+
+        function openOrderModal() {
+            alert('📦 نموذج إضافة طلب مع تسعير يدوي - سيتم إضافته قريباً');
+        }
+
+        function openAdvanceModal() {
+            alert('💳 نموذج إضافة سلفة - سيتم إضافته قريباً');
+        }
+        
+        // Initialize
+        showPage('dashboard');
+    </script>
+</body>
+</html>
