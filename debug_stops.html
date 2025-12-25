@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debug Stops Buttons</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .btn { 
+            padding: 0.6rem 1.1rem; 
+            border-radius: 8px; 
+            font-weight: 600; 
+            cursor: pointer; 
+            transition: all 0.3s;
+            border: none;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+            font-size: 0.875rem;
+        }
+        .btn-primary { background: #3b82f6; color: white; }
+        .btn-secondary { background: #6b7280; color: white; }
+        .btn-danger { background: #ef4444; color: white; }
+        .btn-sm { padding: 0.4rem 0.8rem; font-size: 0.75rem; }
+        .card { 
+            background: white; 
+            border-radius: 10px; 
+            box-shadow: 0 2px 10px rgba(0,0,0,0.06); 
+            padding: 1.5rem; 
+        }
+    </style>
+</head>
+<body class="bg-gray-100 p-8">
+    <div class="max-w-6xl mx-auto">
+        <h1 class="text-3xl font-bold mb-6">🛑 Debug Stops Page</h1>
+        
+        <!-- Test 1: Direct Button Calls -->
+        <div class="card mb-6">
+            <h2 class="text-xl font-bold mb-4">Test 1: Direct Function Calls</h2>
+            <button class="btn btn-primary" onclick="testOpenStopModal()">
+                Test openStopModal
+            </button>
+            <button class="btn btn-danger ml-2" onclick="testDeleteStop()">
+                Test deleteStop
+            </button>
+            <div id="result1" class="mt-4 p-4 bg-blue-50 rounded hidden"></div>
+        </div>
+
+        <!-- Test 2: Simulated Table with Buttons -->
+        <div class="card mb-6">
+            <h2 class="text-xl font-bold mb-4">Test 2: Simulated Stops Table</h2>
+            <div class="overflow-x-auto">
+                <table class="w-full">
+                    <thead>
+                        <tr class="bg-gray-100">
+                            <th class="p-3 text-left">ID</th>
+                            <th class="p-3 text-left">Date</th>
+                            <th class="p-3 text-left">Company</th>
+                            <th class="p-3 text-left">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="test-tbody">
+                        <!-- Will be filled by JavaScript -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Test 3: Check if Functions Exist -->
+        <div class="card mb-6">
+            <h2 class="text-xl font-bold mb-4">Test 3: Function Availability</h2>
+            <div id="function-check" class="space-y-2"></div>
+        </div>
+
+        <!-- Test 4: Console Log -->
+        <div class="card">
+            <h2 class="text-xl font-bold mb-4">Test 4: Console Output</h2>
+            <div id="console-output" class="bg-gray-900 text-green-400 p-4 rounded font-mono text-sm"></div>
+        </div>
+    </div>
+
+    <script>
+        // Console logger
+        const consoleOutput = document.getElementById('console-output');
+        function log(message) {
+            console.log(message);
+            const time = new Date().toLocaleTimeString();
+            consoleOutput.innerHTML += `[${time}] ${message}<br>`;
+            consoleOutput.scrollTop = consoleOutput.scrollHeight;
+        }
+
+        log('Page loaded');
+
+        // Define the functions (like in index.html)
+        function openStopModal(type = 'single', id = null) {
+            log(`✅ openStopModal called: type="${type}", id="${id}"`);
+            alert(`openStopModal called!\nType: ${type}\nID: ${id}`);
+        }
+
+        function deleteStop(id) {
+            log(`✅ deleteStop called: id="${id}"`);
+            if (confirm(`Delete stop ${id}?`)) {
+                alert(`Stop ${id} would be deleted`);
+            }
+        }
+
+        // Test functions
+        function testOpenStopModal() {
+            log('Testing openStopModal...');
+            openStopModal('single', 'test123');
+            document.getElementById('result1').classList.remove('hidden');
+            document.getElementById('result1').innerHTML = '✅ openStopModal executed successfully!';
+        }
+
+        function testDeleteStop() {
+            log('Testing deleteStop...');
+            deleteStop('test456');
+        }
+
+        // Check if functions exist
+        const functionCheck = document.getElementById('function-check');
+        const functions = [
+            'openStopModal',
+            'deleteStop',
+            'testOpenStopModal',
+            'testDeleteStop'
+        ];
+
+        functions.forEach(funcName => {
+            const exists = typeof window[funcName] === 'function';
+            const status = exists ? '✅' : '❌';
+            const color = exists ? 'text-green-600' : 'text-red-600';
+            functionCheck.innerHTML += `
+                <div class="${color} font-semibold">
+                    ${status} ${funcName}: ${typeof window[funcName]}
+                </div>
+            `;
+            log(`${funcName}: ${typeof window[funcName]}`);
+        });
+
+        // Simulate renderStops - create table rows dynamically
+        const testStops = [
+            { id: 'stop001', date: '2025-12-25', company: 'Test Company 1' },
+            { id: 'stop002', date: '2025-12-25', company: 'Test Company 2' },
+            { id: 'stop003', date: '2025-12-25', company: 'Test Company 3' }
+        ];
+
+        log('Generating table rows...');
+        
+        const tbody = document.getElementById('test-tbody');
+        tbody.innerHTML = testStops.map(stop => `
+            <tr class="border-b hover:bg-gray-50">
+                <td class="p-3">#${stop.id}</td>
+                <td class="p-3">${stop.date}</td>
+                <td class="p-3">${stop.company}</td>
+                <td class="p-3">
+                    <button class="btn btn-primary btn-sm" onclick="openStopModal('single', '${stop.id}')">✏️ Edit</button>
+                    <button class="btn btn-danger btn-sm ml-2" onclick="deleteStop('${stop.id}')">🗑️ Delete</button>
+                </td>
+            </tr>
+        `).join('');
+
+        log(`Generated ${testStops.length} table rows`);
+        log('✅ All tests ready - Try clicking the buttons!');
+    </script>
+</body>
+</html>

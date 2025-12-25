@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Page</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="p-8">
+    <h1 class="text-2xl font-bold mb-4">Test Page</h1>
+    <button onclick="testButton()" class="bg-blue-500 text-white px-4 py-2 rounded">Click Me</button>
+    <div id="result" class="mt-4"></div>
+    
+    <script>
+        function testButton() {
+            document.getElementById('result').innerHTML = '✅ Button works!';
+            alert('Button clicked!');
+        }
+        
+        console.log('Script loaded successfully');
+    </script>
+</body>
+</html>

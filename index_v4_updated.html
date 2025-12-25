@@ -1,0 +1,698 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Driver Management System - Professional Edition v4</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        
+        * { 
+            font-family: 'Inter', sans-serif; 
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+            font-size: 14px;
+        }
+        
+        /* Date and Time Display */
+        .datetime-display {
+            background: rgba(255,255,255,0.2);
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            margin: 1rem 0;
+            text-align: center;
+            color: white;
+            font-weight: 600;
+        }
+        
+        /* Progress Bar */
+        .progress-bar {
+            width: 100%;
+            height: 20px;
+            background: #e2e8f0;
+            border-radius: 10px;
+            overflow: hidden;
+            margin: 0.5rem 0;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #11998e 0%, #38ef7d 100%);
+            transition: width 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+        
+        /* Mobile-optimized font sizes */
+        @media (max-width: 768px) {
+            body { font-size: 15px; }
+            h1 { font-size: 1.5rem !important; }
+            h2 { font-size: 1.25rem !important; }
+            h3 { font-size: 1.1rem !important; }
+            .stat-value { font-size: 1.5rem !important; }
+            .btn { padding: 0.6rem 1rem !important; font-size: 0.9rem !important; }
+        }
+        
+        .sidebar { 
+            width: 260px; 
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            background: linear-gradient(180deg, #1e3c72 0%, #2a5298 100%);
+            box-shadow: 4px 0 12px rgba(0,0,0,0.1);
+        }
+        
+        .main-content { 
+            margin-left: 260px; 
+            transition: all 0.3s;
+        }
+        
+        @media (max-width: 768px) {
+            .sidebar { 
+                transform: translateX(-100%); 
+                position: fixed; 
+                left: 0; 
+                z-index: 50; 
+                height: 100vh; 
+            }
+            .sidebar.open { transform: translateX(0); }
+            .main-content { margin-left: 0; }
+        }
+        
+        .card { 
+            background: white; 
+            border-radius: 10px; 
+            box-shadow: 0 2px 10px rgba(0,0,0,0.06); 
+            padding: 1rem; 
+            transition: all 0.3s;
+            border: 1px solid rgba(0,0,0,0.05);
+        }
+        
+        .card:hover {
+            box-shadow: 0 4px 18px rgba(0,0,0,0.1);
+            transform: translateY(-2px);
+        }
+        
+        .stat-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 0.9rem;
+        }
+        
+        .stat-card-green {
+            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+        }
+        
+        .stat-card-blue {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        }
+        
+        .stat-card-orange {
+            background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+        }
+        
+        .btn { 
+            padding: 0.6rem 1.1rem; 
+            border-radius: 8px; 
+            font-weight: 600; 
+            cursor: pointer; 
+            transition: all 0.3s;
+            border: none;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+            font-size: 0.875rem;
+        }
+        
+        .btn:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.2); }
+        .btn-primary { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; }
+        .btn-success { background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%); color: white; }
+        .btn-danger { background: linear-gradient(135deg, #eb3349 0%, #f45c43 100%); color: white; }
+        .btn-warning { background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); color: white; }
+        .btn-secondary { background: #e2e8f0; color: #334155; }
+        .btn-sm { padding: 0.4rem 0.8rem; font-size: 0.75rem; }
+        
+        .input { 
+            width: 100%; 
+            padding: 0.6rem; 
+            border: 2px solid #e2e8f0; 
+            border-radius: 6px; 
+            transition: all 0.3s;
+            font-size: 0.875rem;
+        }
+        
+        .input:focus { 
+            outline: none; 
+            border-color: #667eea; 
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+        
+        .modal { 
+            display: none; 
+            position: fixed; 
+            z-index: 1000; 
+            left: 0; 
+            top: 0; 
+            width: 100%; 
+            height: 100%; 
+            background-color: rgba(0,0,0,0.6);
+            backdrop-filter: blur(5px);
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+        }
+        
+        .modal.active { display: flex; }
+        
+        .modal-content {
+            background: white;
+            border-radius: 12px;
+            max-height: 90vh;
+            overflow-y: auto;
+            animation: slideUp 0.3s ease-out;
+        }
+        
+        @keyframes slideUp {
+            from { transform: translateY(50px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        
+        .nav-item { 
+            cursor: pointer; 
+            padding: 0.8rem 1.2rem; 
+            transition: all 0.3s;
+            border-radius: 8px;
+            margin: 0.3rem;
+            display: flex;
+            align-items: center;
+            gap: 0.7rem;
+            font-weight: 500;
+        }
+        
+        .nav-item:hover { background: rgba(255,255,255,0.15); }
+        .nav-item.active { background: rgba(255,255,255,0.25); font-weight: 700; }
+        
+        .page-section { display: none; }
+        .page-section.active { display: block; animation: fadeIn 0.4s; }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        .image-preview {
+            display: inline-block;
+            width: 100px;
+            height: 100px;
+            border-radius: 8px;
+            overflow: hidden;
+            margin: 0.5rem;
+            position: relative;
+            border: 2px solid #e2e8f0;
+        }
+        
+        .image-preview img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .image-preview-remove {
+            position: absolute;
+            top: 4px;
+            right: 4px;
+            background: #ef4444;
+            color: white;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: bold;
+        }
+        
+        .notification-badge {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background: #ef4444;
+            color: white;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            font-size: 11px;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .notification-item {
+            padding: 1rem;
+            border-bottom: 1px solid #e2e8f0;
+            transition: background 0.3s;
+        }
+        
+        .notification-item:hover {
+            background: #f8fafc;
+        }
+        
+        .notification-unread {
+            background: #eff6ff;
+        }
+        
+        table { width: 100%; border-collapse: collapse; }
+        th, td { padding: 0.75rem; text-align: left; border-bottom: 1px solid #e2e8f0; }
+        th { background: #f8fafc; font-weight: 700; color: #334155; }
+        tr:hover { background: #f8fafc; }
+        
+        @media (max-width: 768px) {
+            table { font-size: 0.8rem; }
+            th, td { padding: 0.5rem 0.3rem; }
+        }
+        
+        .badge {
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            display: inline-block;
+        }
+        
+        .badge-training { background: #fef3c7; color: #92400e; }
+        .badge-active { background: #d1fae5; color: #065f46; }
+        .badge-inactive { background: #fee2e2; color: #991b1b; }
+        .badge-pending { background: #fef3c7; color: #92400e; }
+        .badge-completed { background: #d1fae5; color: #065f46; }
+        .badge-warning { background: #fee2e2; color: #991b1b; }
+        
+        /* Stop Item Styles */
+        .stop-item {
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 1rem;
+            margin: 0.5rem 0;
+            background: #f9fafb;
+        }
+        
+        .stop-item.completed {
+            border-color: #10b981;
+            background: #f0fdf4;
+        }
+        
+        .stop-item.no-image {
+            border-color: #f59e0b;
+            background: #fffbeb;
+        }
+    </style>
+</head>
+<body>
+    <!-- Mobile Menu Toggle -->
+    <button id="mobile-menu-toggle" class="fixed top-4 left-4 z-50 md:hidden bg-white p-3 rounded-lg shadow-lg" onclick="toggleSidebar()">
+        ☰
+    </button>
+
+    <!-- Sidebar Navigation -->
+    <div class="sidebar fixed h-full overflow-y-auto" id="sidebar">
+        <div class="p-6">
+            <h1 class="text-2xl font-bold text-white mb-2">🚗 DMS Pro</h1>
+            <p class="text-white/70 text-sm">Driver Management System</p>
+            
+            <!-- Date & Time Display -->
+            <div class="datetime-display mt-4">
+                <div id="current-date" class="text-sm"></div>
+                <div id="current-time" class="text-lg font-bold"></div>
+            </div>
+        </div>
+        
+        <nav class="px-3 pb-6">
+            <div class="nav-item text-white active" onclick="showPage('dashboard')">
+                📊 Dashboard
+            </div>
+            <div class="nav-item text-white" onclick="showPage('drivers')">
+                👨‍✈️ Drivers
+            </div>
+            <div class="nav-item text-white" onclick="showPage('companies')">
+                🏢 Companies
+            </div>
+            <div class="nav-item text-white" onclick="showPage('stops')">
+                📍 Stops
+            </div>
+            <div class="nav-item text-white" onclick="showPage('salaries')">
+                💰 Salaries
+            </div>
+            <div class="nav-item text-white" onclick="showPage('advances')">
+                💸 Advances
+            </div>
+            <div class="nav-item text-white" onclick="showPage('reports')">
+                📈 Reports
+            </div>
+            <div class="nav-item text-white" onclick="showPage('archive')">
+                🗃️ Archive
+            </div>
+            <div class="nav-item text-white" onclick="showPage('notifications')" style="position: relative;">
+                🔔 Notifications
+                <span id="notification-count" class="notification-badge" style="display: none;">0</span>
+            </div>
+            <div class="nav-item text-white" onclick="showPage('settings')">
+                ⚙️ Settings
+            </div>
+        </nav>
+    </div>
+
+    <!-- Main Content Area -->
+    <div class="main-content p-4 md:p-8">
+        <!-- Dashboard Page -->
+        <div id="dashboard" class="page-section active">
+            <div class="flex justify-between items-center mb-6">
+                <div>
+                    <h1 class="text-3xl font-bold text-gray-800">📊 Dashboard</h1>
+                    <p class="text-gray-600 mt-1" id="dashboard-date"></p>
+                </div>
+                <button class="btn btn-primary" onclick="openSOPModal()">
+                    ➕ Add SOP
+                </button>
+            </div>
+
+            <!-- Daily Revenue Card -->
+            <div class="card mb-6" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
+                <h3 class="text-lg font-bold mb-2">💷 Today's Revenue</h3>
+                <div class="flex justify-between items-center">
+                    <div>
+                        <p class="text-3xl font-bold" id="daily-revenue">£0.00</p>
+                        <p class="text-sm opacity-80" id="daily-stops-count">0 stops completed</p>
+                    </div>
+                    <div class="text-5xl opacity-50">💰</div>
+                </div>
+            </div>
+
+            <!-- Statistics Cards -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+                <div class="card stat-card">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <p class="text-white/80 text-sm font-medium">Total Drivers</p>
+                            <p class="text-3xl font-bold mt-2 stat-value" id="stat-drivers">0</p>
+                        </div>
+                        <div class="text-4xl">👨‍✈️</div>
+                    </div>
+                </div>
+                <div class="card stat-card stat-card-green">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <p class="text-white/80 text-sm font-medium">Active Companies</p>
+                            <p class="text-3xl font-bold mt-2 stat-value" id="stat-companies">0</p>
+                        </div>
+                        <div class="text-4xl">🏢</div>
+                    </div>
+                </div>
+                <div class="card stat-card stat-card-blue">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <p class="text-white/80 text-sm font-medium">Total Stops</p>
+                            <p class="text-3xl font-bold mt-2 stat-value" id="stat-stops">0</p>
+                        </div>
+                        <div class="text-4xl">📍</div>
+                    </div>
+                </div>
+                <div class="card stat-card stat-card-orange">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <p class="text-white/80 text-sm font-medium">Total Revenue</p>
+                            <p class="text-3xl font-bold mt-2 stat-value" id="stat-revenue">£0</p>
+                        </div>
+                        <div class="text-4xl">💷</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recent Activities -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                <div class="card">
+                    <h3 class="text-lg font-bold text-gray-800 mb-3">📌 Recent Stops</h3>
+                    <div id="recent-stops">
+                        <p class="text-gray-500 text-sm">No recent stops</p>
+                    </div>
+                </div>
+                <div class="card">
+                    <h3 class="text-lg font-bold text-gray-800 mb-3">👥 Active Drivers</h3>
+                    <div id="active-drivers">
+                        <p class="text-gray-500 text-sm">No active drivers</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Drivers Page -->
+        <div id="drivers" class="page-section">
+            <div class="flex justify-between items-center mb-6">
+                <div>
+                    <h1 class="text-3xl font-bold text-gray-800">👨‍✈️ Drivers</h1>
+                    <p class="text-gray-600 mt-1">Manage Driver Information</p>
+                </div>
+                <button class="btn btn-primary" onclick="openDriverModal()">
+                    ➕ Add Driver
+                </button>
+            </div>
+
+            <div class="card">
+                <div class="mb-4">
+                    <input type="text" id="driver-search" class="input" placeholder="🔍 Search drivers..." onkeyup="searchDrivers()">
+                </div>
+                <div class="overflow-x-auto">
+                    <table id="drivers-table">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Phone</th>
+                                <th>Email</th>
+                                <th>Join Date</th>
+                                <th>Training Days</th>
+                                <th>Status</th>
+                                <th>Stops</th>
+                                <th>Advances</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="drivers-tbody">
+                            <tr><td colspan="9" class="text-center text-gray-500">No drivers found</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Rest of the pages will be added in next part due to size... -->
+        <!-- I'll create a complete version with all features -->
+        
+    </div>
+
+    <!-- Modals will be added here -->
+    
+    <script>
+        // Global Variables
+        let drivers = JSON.parse(localStorage.getItem('drivers_v4')) || [];
+        let companies = JSON.parse(localStorage.getItem('companies_v4')) || [];
+        let stops = JSON.parse(localStorage.getItem('stops_v4')) || [];
+        let advances = JSON.parse(localStorage.getItem('advances_v4')) || [];
+        let notifications = JSON.parse(localStorage.getItem('notifications_v4')) || [];
+        let settings = JSON.parse(localStorage.getItem('settings_v4')) || {
+            trainingDays: 15,
+            targetStops: 100,
+            baseSalary: 120,
+            bonusPerStop: 1,
+            driverCostPerStop: 1.2
+        };
+
+        let uploadedDocuments = [];
+        let currentEditId = null;
+        
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            updateDateTime();
+            setInterval(updateDateTime, 1000);
+            initializeApp();
+        });
+        
+        function updateDateTime() {
+            const now = new Date();
+            const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+            const dateStr = now.toLocaleDateString('en-US', options);
+            const timeStr = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+            
+            document.getElementById('current-date').textContent = dateStr;
+            document.getElementById('current-time').textContent = timeStr;
+            document.getElementById('dashboard-date').textContent = dateStr;
+        }
+        
+        function initializeApp() {
+            renderDashboard();
+            renderDrivers();
+            renderCompanies();
+            renderStops();
+            renderAdvances();
+            checkTrainingPeriods();
+            updateNotificationBadge();
+            calculateDailyRevenue();
+        }
+        
+        function calculateDailyRevenue() {
+            const today = new Date().toISOString().split('T')[0];
+            const todayStops = stops.filter(s => s.date === today && s.status === 'completed');
+            const revenue = todayStops.reduce((sum, s) => sum + parseFloat(s.revenue || 0), 0);
+            
+            document.getElementById('daily-revenue').textContent = `£${revenue.toFixed(2)}`;
+            document.getElementById('daily-stops-count').textContent = `${todayStops.length} stops completed`;
+        }
+        
+        function showPage(pageId) {
+            document.querySelectorAll('.page-section').forEach(page => page.classList.remove('active'));
+            document.getElementById(pageId).classList.add('active');
+            
+            document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            if (window.innerWidth <= 768) {
+                document.getElementById('sidebar').classList.remove('open');
+            }
+            
+            if (pageId === 'dashboard') renderDashboard();
+            else if (pageId === 'drivers') renderDrivers();
+            else if (pageId === 'stops') renderStops();
+            else if (pageId === 'archive') renderArchive();
+        }
+        
+        function toggleSidebar() {
+            document.getElementById('sidebar').classList.toggle('open');
+        }
+        
+        // Driver Management
+        function openDriverModal(id = null) {
+            // Will be implemented with full features
+            alert('Driver modal will open - Full implementation in progress');
+        }
+        
+        function renderDrivers() {
+            const tbody = document.getElementById('drivers-tbody');
+            
+            if (drivers.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="9" class="text-center text-gray-500">No drivers found</td></tr>';
+                return;
+            }
+            
+            tbody.innerHTML = drivers.map(driver => {
+                const daysSinceJoin = Math.floor((new Date() - new Date(driver.joinDate)) / (1000 * 60 * 60 * 24));
+                const trainingDaysLeft = Math.max(0, settings.trainingDays - daysSinceJoin);
+                const driverStops = stops.filter(s => s.driverId === driver.id);
+                const completedStops = driverStops.filter(s => s.status === 'completed').length;
+                const totalAdvances = advances
+                    .filter(a => a.driverId === driver.id && a.status !== 'paid')
+                    .reduce((sum, a) => sum + a.remaining, 0);
+                
+                let statusBadge = '';
+                if (!driver.salaryActivated) {
+                    statusBadge = `<span class="badge badge-training">🎓 Training (${trainingDaysLeft} days left)</span>`;
+                } else {
+                    statusBadge = '<span class="badge badge-active">✅ Active</span>';
+                }
+                
+                return `
+                    <tr>
+                        <td class="font-semibold">${driver.name}</td>
+                        <td>${driver.phone}</td>
+                        <td>${driver.email}</td>
+                        <td>${driver.joinDate}</td>
+                        <td class="font-bold ${trainingDaysLeft > 0 ? 'text-orange-600' : 'text-green-600'}">
+                            ${daysSinceJoin} / ${settings.trainingDays}
+                        </td>
+                        <td>${statusBadge}</td>
+                        <td>
+                            <div class="text-sm font-bold">${completedStops} stops</div>
+                            <div class="progress-bar" style="height: 10px;">
+                                <div class="progress-fill" style="width: ${Math.min(100, (completedStops / settings.targetStops) * 100)}%"></div>
+                            </div>
+                        </td>
+                        <td class="font-bold ${totalAdvances > 0 ? 'text-red-600' : 'text-green-600'}">
+                            £${totalAdvances.toFixed(2)}
+                        </td>
+                        <td>
+                            <button class="btn btn-primary btn-sm" onclick="viewDriverDetails('${driver.id}')">👁️ View</button>
+                            <button class="btn btn-warning btn-sm" onclick="openDriverModal('${driver.id}')">✏️ Edit</button>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+        
+        function viewDriverDetails(driverId) {
+            alert('Driver details view - Full implementation in progress');
+        }
+        
+        // SOP Modal (formerly Request Modal)
+        function openSOPModal() {
+            alert('SOP Modal - Full implementation in progress');
+        }
+        
+        // Render Dashboard
+        function renderDashboard() {
+            document.getElementById('stat-drivers').textContent = drivers.length;
+            document.getElementById('stat-companies').textContent = companies.filter(c => c.status === 'active').length;
+            document.getElementById('stat-stops').textContent = stops.length;
+            
+            const totalRevenue = stops.reduce((sum, s) => sum + (s.revenue || 0), 0);
+            document.getElementById('stat-revenue').textContent = `£${totalRevenue.toFixed(2)}`;
+            
+            calculateDailyRevenue();
+        }
+        
+        function renderCompanies() {
+            // Implementation placeholder
+        }
+        
+        function renderStops() {
+            // Full stops implementation with single/many stops
+            alert('Stops rendering - Full implementation in progress');
+        }
+        
+        function renderAdvances() {
+            // Implementation placeholder
+        }
+        
+        function renderArchive() {
+            // Archive page for postcode images
+            alert('Archive page - Full implementation in progress');
+        }
+        
+        function checkTrainingPeriods() {
+            // Training period check implementation
+        }
+        
+        function updateNotificationBadge() {
+            const unreadCount = notifications.filter(n => !n.read && n.actionRequired).length;
+            const badge = document.getElementById('notification-count');
+            
+            if (unreadCount > 0) {
+                badge.textContent = unreadCount;
+                badge.style.display = 'flex';
+            } else {
+                badge.style.display = 'none';
+            }
+        }
+        
+        function searchDrivers() {
+            // Search implementation
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Test Stops Page Buttons</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .test-section {
+            background: white;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        button {
+            padding: 10px 20px;
+            margin: 5px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        .btn-primary {
+            background: #3b82f6;
+            color: white;
+        }
+        .btn-danger {
+            background: #ef4444;
+            color: white;
+        }
+        .result {
+            margin-top: 10px;
+            padding: 10px;
+            background: #e0f2fe;
+            border-radius: 5px;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <h1>🧪 Test Stops Page Buttons</h1>
+    
+    <div class="test-section">
+        <h2>Test 1: Edit Button (✏️)</h2>
+        <p>Simulates clicking edit button in Stops table</p>
+        <button class="btn-primary" onclick="testEditButton()">✏️ Test Edit</button>
+        <div id="result1" class="result"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2>Test 2: Delete Button (🗑️)</h2>
+        <p>Simulates clicking delete button in Stops table</p>
+        <button class="btn-danger" onclick="testDeleteButton()">🗑️ Test Delete</button>
+        <div id="result2" class="result"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2>Test 3: Inline onclick Attribute</h2>
+        <p>Tests if inline onclick works (like in the actual table)</p>
+        <button class="btn-primary" onclick="alert('Inline onclick works! ✅')">Test Inline onclick</button>
+    </div>
+    
+    <div class="test-section">
+        <h2>Test 4: Button with Template String</h2>
+        <p>Tests button generated via template string (like renderStops does)</p>
+        <div id="dynamic-buttons"></div>
+        <div id="result4" class="result"></div>
+    </div>
+    
+    <script>
+        // Simulate the functions from index.html
+        function openStopModal(type, id) {
+            console.log(`openStopModal called with type="${type}", id="${id}"`);
+            const result = document.getElementById('result1');
+            result.innerHTML = `✅ Success! openStopModal called with:<br>
+                - type: "${type}"<br>
+                - id: "${id}"`;
+            result.style.display = 'block';
+        }
+        
+        function deleteStop(id) {
+            console.log(`deleteStop called with id="${id}"`);
+            const result = document.getElementById('result2');
+            result.innerHTML = `✅ Success! deleteStop called with id: "${id}"`;
+            result.style.display = 'block';
+        }
+        
+        function testEditButton() {
+            openStopModal('single', 'test123');
+        }
+        
+        function testDeleteButton() {
+            deleteStop('test456');
+        }
+        
+        // Test 4: Generate buttons dynamically like renderStops() does
+        const testOrder = {
+            id: 'dynamic789',
+            date: '2025-12-25',
+            companyName: 'Test Company',
+            driverName: 'Test Driver',
+            revenue: 50.00,
+            status: 'completed'
+        };
+        
+        const buttonsHtml = `
+            <button class="btn-primary" onclick="openStopModal('single', '${testOrder.id}')">✏️ Edit Dynamic</button>
+            <button class="btn-danger" onclick="deleteStop('${testOrder.id}')">🗑️ Delete Dynamic</button>
+        `;
+        
+        document.getElementById('dynamic-buttons').innerHTML = buttonsHtml;
+        
+        // Log to console
+        console.log('Test page loaded successfully');
+        console.log('All functions defined:', {
+            openStopModal: typeof openStopModal,
+            deleteStop: typeof deleteStop
+        });
+    </script>
+</body>
+</html>
