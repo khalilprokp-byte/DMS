@@ -326,23 +326,18 @@
                     <p class="text-gray-600 mt-1">System Overview & Statistics</p>
                     <p class="text-sm text-gray-500 mt-1" id="current-day-date"></p>
                 </div>
-                <div class="flex gap-2">
-                    <div class="relative" id="add-stop-menu">
-                        <button class="btn btn-primary" onclick="toggleStopMenu()">
-                            🛑 Add Stop ▼
-                        </button>
-                        <div id="stop-dropdown" class="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border hidden z-50">
-                            <button class="w-full text-left px-4 py-3 hover:bg-gray-100 rounded-t-lg" onclick="openStopModal('single'); hideStopMenu()">
-                                ➕ Add Single Stop
-                            </button>
-                            <button class="w-full text-left px-4 py-3 hover:bg-gray-100 rounded-b-lg" onclick="openStopModal('many'); hideStopMenu()">
-                                ➕➕ Add Many Stops
-                            </button>
-                        </div>
-                    </div>
-                    <button class="btn btn-secondary" onclick="openSOPModal()">
-                        ➕ Add SOP
+                <div class="relative" id="add-stop-menu">
+                    <button class="btn btn-primary" onclick="toggleStopMenu()">
+                        🛑 Add Stop ▼
                     </button>
+                    <div id="stop-dropdown" class="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border hidden z-50">
+                        <button class="w-full text-left px-4 py-3 hover:bg-gray-100 rounded-t-lg" onclick="openStopModal('single'); hideStopMenu()">
+                            ➕ Add Single Stop
+                        </button>
+                        <button class="w-full text-left px-4 py-3 hover:bg-gray-100 rounded-b-lg" onclick="openStopModal('many'); hideStopMenu()">
+                            ➕➕ Add Many Stops
+                        </button>
+                    </div>
                 </div>
             </div>
 
