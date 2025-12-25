@@ -326,9 +326,24 @@
                     <p class="text-gray-600 mt-1">System Overview & Statistics</p>
                     <p class="text-sm text-gray-500 mt-1" id="current-day-date"></p>
                 </div>
-                <button class="btn btn-primary" onclick="openSOPModal()">
-                    ➕ Add SOP
-                </button>
+                <div class="flex gap-2">
+                    <div class="relative" id="add-stop-menu">
+                        <button class="btn btn-primary" onclick="toggleStopMenu()">
+                            🛑 Add Stop ▼
+                        </button>
+                        <div id="stop-dropdown" class="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border hidden z-50">
+                            <button class="w-full text-left px-4 py-3 hover:bg-gray-100 rounded-t-lg" onclick="openStopModal('single'); hideStopMenu()">
+                                ➕ Add Single Stop
+                            </button>
+                            <button class="w-full text-left px-4 py-3 hover:bg-gray-100 rounded-b-lg" onclick="openStopModal('many'); hideStopMenu()">
+                                ➕➕ Add Many Stops
+                            </button>
+                        </div>
+                    </div>
+                    <button class="btn btn-secondary" onclick="openSOPModal()">
+                        ➕ Add SOP
+                    </button>
+                </div>
             </div>
 
             <!-- Statistics Cards -->
@@ -480,8 +495,8 @@
             </div>
 
             <div class="card">
-                <div class="mb-4">
-                    <input type="text" id="order-search" class="input" placeholder="🔍 Search stops..." onkeyup="searchOrders()">
+<div class="mb-4">
+                    <input type="text" id="stop-search" class="input" placeholder="🔍 Search stops..." onkeyup="searchStops()">
                 </div>
                 <div class="overflow-x-auto">
                     <table id="stops-table">
@@ -1185,6 +1200,26 @@
             document.getElementById('sidebar').classList.toggle('open');
         }
 
+        // Stop Menu Toggle Functions
+        function toggleStopMenu() {
+            const dropdown = document.getElementById('stop-dropdown');
+            dropdown.classList.toggle('hidden');
+        }
+
+        function hideStopMenu() {
+            const dropdown = document.getElementById('stop-dropdown');
+            dropdown.classList.add('hidden');
+        }
+
+        // Close dropdown when clicking outside
+        document.addEventListener('click', function(event) {
+            const menu = document.getElementById('add-stop-menu');
+            const dropdown = document.getElementById('stop-dropdown');
+            if (menu && dropdown && !menu.contains(event.target)) {
+                dropdown.classList.add('hidden');
+            }
+        });
+
         // Settings Management
         function loadSettings() {
             document.getElementById('setting-training-days').value = settings.trainingDays;
@@ -1771,7 +1806,7 @@
         }
 
         function searchOrders() {
-            const searchTerm = document.getElementById('order-search').value.toLowerCase();
+            const searchTerm = document.getElementById('stop-search').value.toLowerCase();
             const filteredOrders = stops.filter(o => {
                 const company = companies.find(c => c.id === o.companyId);
                 const driver = drivers.find(d => d.id === o.driverId);
@@ -1779,7 +1814,7 @@
                     o.id.toLowerCase().includes(searchTerm) ||
                     (company && company.name.toLowerCase().includes(searchTerm)) ||
                     (driver && driver.name.toLowerCase().includes(searchTerm)) ||
-                    o.postcode.toLowerCase().includes(searchTerm)
+                    (o.postcode && o.postcode.toLowerCase().includes(searchTerm))
                 );
             });
             
@@ -1797,21 +1832,35 @@
                     statusBadge = '<span class="badge badge-pending">⏳ Pending</span>';
                 }
                 
+                // Check for image
+                const imageStatus = order.image ? 
+                    '<span class="text-green-600">✓ Has Image</span>' : 
+                    (order.status === 'completed' ? '<span class="text-red-600">⚠️ No Image</span>' : '-');
+                
+                // Highlight row if completed without image
+                const rowClass = order.status === 'completed' && !order.image ? 'bg-red-50' : '';
+                
                 return `
-                    <tr>
+                    <tr class="${rowClass}">
                         <td class="font-mono">#${order.id.slice(-6)}</td>
                         <td>${order.date}</td>
                         <td>${company ? company.name : 'N/A'}</td>
                         <td>${driver ? driver.name : 'N/A'}</td>
                         <td class="font-bold text-green-600">£${order.revenue.toFixed(2)}</td>
                         <td>${statusBadge}</td>
+                        <td>${imageStatus}</td>
                         <td>
-                            <button class="btn btn-primary btn-sm" onclick="openOrderModal('${order.id}')">✏️</button>
-                            <button class="btn btn-danger btn-sm" onclick="deleteOrder('${order.id}')">🗑️</button>
+                            <button class="btn btn-primary btn-sm" onclick="openStopModal('single', '${order.id}')">✏️</button>
+                            <button class="btn btn-danger btn-sm" onclick="deleteStop('${order.id}')">🗑️</button>
                         </td>
                     </tr>
                 `;
             }).join('');
+        }
+        
+        // Alias for consistency
+        function searchStops() {
+            searchOrders();
         }
 
         // New Stop Modal Functions
