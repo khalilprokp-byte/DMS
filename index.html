@@ -1315,6 +1315,7 @@
                         </td>
                         <td>
                             <button class="btn btn-primary btn-sm" onclick="openDriverModal('${driver.id}')">✏️</button>
+                            <button class="btn btn-warning btn-sm" onclick="openAdvanceModalForDriver('${driver.id}')">💸</button>
                             <button class="btn btn-danger btn-sm" onclick="deleteDriver('${driver.id}')">🗑️</button>
                         </td>
                     </tr>
@@ -1357,6 +1358,7 @@
                         </td>
                         <td>
                             <button class="btn btn-primary btn-sm" onclick="openDriverModal('${driver.id}')">✏️</button>
+                            <button class="btn btn-warning btn-sm" onclick="openAdvanceModalForDriver('${driver.id}')">💸</button>
                             <button class="btn btn-danger btn-sm" onclick="deleteDriver('${driver.id}')">🗑️</button>
                         </td>
                     </tr>
@@ -1696,6 +1698,27 @@
                 document.getElementById('advance-id').value = '';
                 document.getElementById('advance-date').value = new Date().toISOString().split('T')[0];
             }
+            
+            modal.classList.add('active');
+        }
+
+        function openAdvanceModalForDriver(driverId) {
+            const driver = drivers.find(d => d.id === driverId);
+            if (!driver) return;
+            
+            if (!confirm(`💸 Add advance for ${driver.name}?`)) return;
+            
+            const modal = document.getElementById('advance-modal');
+            const title = document.getElementById('advance-modal-title');
+            const form = document.getElementById('advance-form');
+            
+            form.reset();
+            populateDriverDropdowns();
+            
+            title.textContent = `💸 Add Advance for ${driver.name}`;
+            document.getElementById('advance-id').value = '';
+            document.getElementById('advance-driver').value = driverId;
+            document.getElementById('advance-date').value = new Date().toISOString().split('T')[0];
             
             modal.classList.add('active');
         }
