@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Driver Management System - Professional Edition</title>
+    <title>Driver Management System - v4.0 (Updated)</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
@@ -279,6 +279,7 @@
         <div class="p-6">
             <h1 class="text-2xl font-bold text-white mb-2">🚗 DMS Pro</h1>
             <p class="text-white/70 text-sm">Driver Management System</p>
+            <p class="text-white/50 text-xs mt-1">v4.0 - Updated</p>
         </div>
         
         <nav class="px-3 pb-6">
@@ -410,11 +411,12 @@
                                 <th>Join Date</th>
                                 <th>Status</th>
                                 <th>Advances</th>
+                                <th>Stops Progress</th>
                                 <th>Actions</th>
                             </tr>
                         </thead>
                         <tbody id="drivers-tbody">
-                            <tr><td colspan="7" class="text-center text-gray-500">No drivers found</td></tr>
+                            <tr><td colspan="8" class="text-center text-gray-500">No drivers found</td></tr>
                         </tbody>
                     </table>
                 </div>
@@ -1287,7 +1289,7 @@
             const tbody = document.getElementById('drivers-tbody');
             
             if (drivers.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="7" class="text-center text-gray-500">No drivers found</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="8" class="text-center text-gray-500">No drivers found</td></tr>';
                 return;
             }
             
@@ -1303,6 +1305,10 @@
                     statusBadge = '<span class="badge badge-active">✅ Active</span>';
                 }
                 
+                const driverStopsCount = stops.filter(s => s.driverId === driver.id).length;
+                const completedStopsCount = stops.filter(s => s.driverId === driver.id && s.status === 'completed').length;
+                const progressPercent = driverStopsCount > 0 ? (completedStopsCount / driverStopsCount * 100).toFixed(0) : 0;
+                
                 return `
                     <tr>
                         <td class="font-semibold">${driver.name}</td>
@@ -1312,6 +1318,16 @@
                         <td>${statusBadge}</td>
                         <td class="font-bold ${totalAdvances > 0 ? 'text-red-600' : 'text-green-600'}">
                             £${totalAdvances.toFixed(2)}
+                        </td>
+                        <td>
+                            <div class="text-xs">
+                                <div class="flex items-center gap-2 mb-1">
+                                    <span class="font-semibold">${completedStopsCount}/${driverStopsCount} stops</span>
+                                </div>
+                                <div class="w-full bg-gray-200 rounded-full h-2">
+                                    <div class="bg-blue-600 h-2 rounded-full" style="width: ${progressPercent}%"></div>
+                                </div>
+                            </div>
                         </td>
                         <td>
                             <button class="btn btn-primary btn-sm" onclick="openDriverModal('${driver.id}')">✏️</button>
@@ -1346,6 +1362,10 @@
                     statusBadge = '<span class="badge badge-active">✅ Active</span>';
                 }
                 
+                const driverStopsCount = stops.filter(s => s.driverId === driver.id).length;
+                const completedStopsCount = stops.filter(s => s.driverId === driver.id && s.status === 'completed').length;
+                const progressPercent = driverStopsCount > 0 ? (completedStopsCount / driverStopsCount * 100).toFixed(0) : 0;
+                
                 return `
                     <tr>
                         <td class="font-semibold">${driver.name}</td>
@@ -1355,6 +1375,16 @@
                         <td>${statusBadge}</td>
                         <td class="font-bold ${totalAdvances > 0 ? 'text-red-600' : 'text-green-600'}">
                             £${totalAdvances.toFixed(2)}
+                        </td>
+                        <td>
+                            <div class="text-xs">
+                                <div class="flex items-center gap-2 mb-1">
+                                    <span class="font-semibold">${completedStopsCount}/${driverStopsCount} stops</span>
+                                </div>
+                                <div class="w-full bg-gray-200 rounded-full h-2">
+                                    <div class="bg-blue-600 h-2 rounded-full" style="width: ${progressPercent}%"></div>
+                                </div>
+                            </div>
                         </td>
                         <td>
                             <button class="btn btn-primary btn-sm" onclick="openDriverModal('${driver.id}')">✏️</button>
