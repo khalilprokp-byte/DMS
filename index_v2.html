@@ -1,0 +1,1804 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Driver Management System - Professional Edition</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap');
+        
+        * { 
+            font-family: 'Inter', sans-serif; 
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+            font-size: 14px;
+        }
+        
+        /* Mobile-optimized font sizes */
+        @media (max-width: 768px) {
+            body { font-size: 15px; }
+            h1 { font-size: 1.5rem !important; }
+            h2 { font-size: 1.25rem !important; }
+            h3 { font-size: 1.1rem !important; }
+            .stat-value { font-size: 1.5rem !important; }
+            .btn { padding: 0.6rem 1rem !important; font-size: 0.9rem !important; }
+        }
+        
+        .sidebar { 
+            width: 260px; 
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            background: linear-gradient(180deg, #1e3c72 0%, #2a5298 100%);
+            box-shadow: 4px 0 12px rgba(0,0,0,0.1);
+        }
+        
+        .main-content { 
+            margin-left: 260px; 
+            transition: all 0.3s;
+        }
+        
+        @media (max-width: 768px) {
+            .sidebar { 
+                transform: translateX(-100%); 
+                position: fixed; 
+                left: 0; 
+                z-index: 50; 
+                height: 100vh; 
+            }
+            .sidebar.open { transform: translateX(0); }
+            .main-content { margin-left: 0; }
+        }
+        
+        .card { 
+            background: white; 
+            border-radius: 12px; 
+            box-shadow: 0 2px 12px rgba(0,0,0,0.06); 
+            padding: 1.25rem; 
+            transition: all 0.3s;
+            border: 1px solid rgba(0,0,0,0.05);
+        }
+        
+        .card:hover {
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            transform: translateY(-2px);
+        }
+        
+        .stat-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 1rem;
+        }
+        
+        .stat-card-green {
+            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+        }
+        
+        .stat-card-blue {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        }
+        
+        .stat-card-orange {
+            background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+        }
+        
+        .btn { 
+            padding: 0.65rem 1.25rem; 
+            border-radius: 8px; 
+            font-weight: 600; 
+            cursor: pointer; 
+            transition: all 0.3s;
+            border: none;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+            font-size: 0.875rem;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.18);
+        }
+        
+        .btn-primary { 
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white; 
+        }
+        
+        .btn-success { 
+            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+            color: white; 
+        }
+        
+        .btn-danger { 
+            background: linear-gradient(135deg, #eb3349 0%, #f45c43 100%);
+            color: white; 
+        }
+        
+        .btn-secondary { 
+            background: linear-gradient(135deg, #868f96 0%, #596164 100%);
+            color: white; 
+        }
+        
+        .badge { 
+            padding: 0.3rem 0.75rem; 
+            border-radius: 16px; 
+            font-size: 0.7rem; 
+            font-weight: 600;
+            letter-spacing: 0.3px;
+        }
+        
+        .badge-success { background: #d1fae5; color: #065f46; }
+        .badge-warning { background: #fef3c7; color: #92400e; }
+        .badge-danger { background: #fee2e2; color: #991b1b; }
+        .badge-info { background: #dbeafe; color: #1e40af; }
+        
+        .input { 
+            width: 100%; 
+            padding: 0.65rem 1rem; 
+            border: 2px solid #e5e7eb; 
+            border-radius: 8px;
+            transition: all 0.3s;
+            font-size: 0.9rem;
+        }
+        
+        .input:focus { 
+            outline: none; 
+            border-color: #667eea; 
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+        
+        .modal { 
+            display: none; 
+            position: fixed; 
+            inset: 0; 
+            background: rgba(0,0,0,0.6); 
+            z-index: 100; 
+            align-items: center; 
+            justify-content: center;
+            backdrop-filter: blur(4px);
+        }
+        
+        .modal.active { display: flex; }
+        
+        .modal-content { 
+            background: white; 
+            border-radius: 16px; 
+            max-width: 95%; 
+            max-height: 90vh; 
+            overflow-y: auto;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        
+        .hidden { display: none !important; }
+        
+        .nav-item {
+            color: rgba(255,255,255,0.8);
+            transition: all 0.3s;
+            border-radius: 8px;
+            font-size: 0.9rem;
+        }
+        
+        .nav-item:hover {
+            background: rgba(255,255,255,0.1);
+            color: white;
+        }
+        
+        .nav-item.active {
+            background: rgba(255,255,255,0.2);
+            color: white;
+        }
+        
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: white;
+            padding: 1rem 1.5rem;
+            border-radius: 8px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+            z-index: 1000;
+            animation: slideIn 0.3s ease;
+        }
+        
+        @keyframes slideIn {
+            from { transform: translateX(400px); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        
+        .image-preview {
+            max-width: 120px;
+            max-height: 120px;
+            object-fit: cover;
+            border-radius: 8px;
+            margin: 0.5rem;
+        }
+        
+        .quick-add-btn {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+            color: white;
+            font-size: 28px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 6px 24px rgba(0,0,0,0.3);
+            cursor: pointer;
+            z-index: 40;
+            transition: all 0.3s;
+        }
+        
+        .quick-add-btn:hover {
+            transform: scale(1.1) rotate(90deg);
+        }
+        
+        @media (max-width: 768px) {
+            .quick-add-btn {
+                width: 55px;
+                height: 55px;
+                font-size: 24px;
+                bottom: 20px;
+                right: 20px;
+            }
+        }
+        
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 10px;
+        }
+        
+        ::-webkit-scrollbar-thumb:hover {
+            background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+        }
+    </style>
+</head>
+<body>
+    <!-- Sidebar -->
+    <div id="sidebar" class="sidebar fixed top-0 bottom-0 left-0">
+        <div class="p-5 border-b border-white border-opacity-20">
+            <h1 class="text-xl font-bold text-white">Driver Management</h1>
+            <p class="text-xs text-white text-opacity-70 mt-1">Professional System</p>
+        </div>
+        <nav class="p-3">
+            <a href="#" onclick="showPage('dashboard')" class="nav-item active flex items-center gap-2 p-2.5 mb-1" data-page="dashboard">
+                <span class="text-lg">📊</span> 
+                <span>Dashboard</span>
+            </a>
+            <a href="#" onclick="showPage('drivers')" class="nav-item flex items-center gap-2 p-2.5 mb-1" data-page="drivers">
+                <span class="text-lg">👥</span> 
+                <span>Drivers</span>
+            </a>
+            <a href="#" onclick="showPage('companies')" class="nav-item flex items-center gap-2 p-2.5 mb-1" data-page="companies">
+                <span class="text-lg">🏢</span> 
+                <span>Companies</span>
+            </a>
+            <a href="#" onclick="showPage('orders')" class="nav-item flex items-center gap-2 p-2.5 mb-1" data-page="orders">
+                <span class="text-lg">📦</span> 
+                <span>Orders</span>
+            </a>
+            <a href="#" onclick="showPage('salaries')" class="nav-item flex items-center gap-2 p-2.5 mb-1" data-page="salaries">
+                <span class="text-lg">💰</span> 
+                <span>Salaries</span>
+            </a>
+            <a href="#" onclick="showPage('reports')" class="nav-item flex items-center gap-2 p-2.5 mb-1" data-page="reports">
+                <span class="text-lg">📄</span> 
+                <span>Reports</span>
+            </a>
+            <a href="#" onclick="showPage('settings')" class="nav-item flex items-center gap-2 p-2.5 mb-1" data-page="settings">
+                <span class="text-lg">⚙️</span> 
+                <span>Settings</span>
+            </a>
+        </nav>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <!-- Header -->
+        <div class="bg-white shadow-sm p-4 flex items-center justify-between sticky top-0 z-40">
+            <button onclick="toggleSidebar()" class="md:hidden p-2 hover:bg-gray-100 rounded-lg transition">
+                <span class="text-xl">☰</span>
+            </button>
+            <div class="flex items-center gap-4">
+                <div class="text-right">
+                    <p class="text-sm font-semibold text-gray-800" id="current-date">Week 51, 2024</p>
+                    <p class="text-xs text-gray-500">December 25, 2024</p>
+                </div>
+                <div class="flex items-center gap-2 bg-gradient-to-r from-purple-500 to-indigo-600 text-white px-3 py-2 rounded-full">
+                    <span class="text-sm font-semibold">Admin</span>
+                    <span class="text-base">👤</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Add Button -->
+        <div class="quick-add-btn" onclick="openOrderModal()" title="Quick Add Order">
+            +
+        </div>
+
+        <!-- Pages Container -->
+        <div id="pages-container" class="p-4 md:p-6">
+            
+            <!-- Dashboard Page -->
+            <div id="dashboard-page" class="page">
+                <div class="bg-gradient-to-r from-purple-600 to-indigo-600 text-white p-4 md:p-6 rounded-xl mb-4 md:mb-6 shadow-lg">
+                    <h2 class="text-2xl md:text-3xl font-bold mb-1">Dashboard</h2>
+                    <p class="text-sm md:text-base opacity-90">Overview of system performance</p>
+                </div>
+                
+                <!-- Main Stats Cards -->
+                <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4 mb-4 md:mb-6">
+                    <div class="card stat-card">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-xs opacity-90 mb-1">Total Revenue</p>
+                                <p class="text-xl md:text-2xl font-bold stat-value" id="total-revenue">£0</p>
+                            </div>
+                            <span class="text-3xl md:text-4xl opacity-90">💰</span>
+                        </div>
+                    </div>
+                    
+                    <div class="card stat-card-green">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-xs opacity-90 mb-1">Total Salaries</p>
+                                <p class="text-xl md:text-2xl font-bold stat-value" id="total-salaries">£0</p>
+                            </div>
+                            <span class="text-3xl md:text-4xl opacity-90">💵</span>
+                        </div>
+                    </div>
+                    
+                    <div class="card stat-card-blue">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-xs opacity-90 mb-1">Net Profit</p>
+                                <p class="text-xl md:text-2xl font-bold stat-value" id="net-profit">£0</p>
+                            </div>
+                            <span class="text-3xl md:text-4xl opacity-90">📈</span>
+                        </div>
+                    </div>
+                    
+                    <div class="card stat-card-orange">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-xs opacity-90 mb-1">Total Orders</p>
+                                <p class="text-xl md:text-2xl font-bold stat-value" id="total-orders">0</p>
+                            </div>
+                            <span class="text-3xl md:text-4xl opacity-90">📦</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Secondary Stats -->
+                <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4 mb-4 md:mb-6">
+                    <div class="card bg-green-50 border-2 border-green-200">
+                        <div class="flex items-center gap-2 md:gap-3">
+                            <div class="text-2xl md:text-3xl">✅</div>
+                            <div>
+                                <p class="text-xs text-green-700 font-semibold">Active Drivers</p>
+                                <p class="text-xl md:text-2xl font-bold text-green-800" id="active-drivers">0</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="card bg-yellow-50 border-2 border-yellow-200">
+                        <div class="flex items-center gap-2 md:gap-3">
+                            <div class="text-2xl md:text-3xl">🎓</div>
+                            <div>
+                                <p class="text-xs text-yellow-700 font-semibold">In Training</p>
+                                <p class="text-xl md:text-2xl font-bold text-yellow-800" id="training-drivers">0</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="card bg-blue-50 border-2 border-blue-200">
+                        <div class="flex items-center gap-2 md:gap-3">
+                            <div class="text-2xl md:text-3xl">🏢</div>
+                            <div>
+                                <p class="text-xs text-blue-700 font-semibold">Active Companies</p>
+                                <p class="text-xl md:text-2xl font-bold text-blue-800" id="active-companies">0</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="card bg-purple-50 border-2 border-purple-200">
+                        <div class="flex items-center gap-2 md:gap-3">
+                            <div class="text-2xl md:text-3xl">✓</div>
+                            <div>
+                                <p class="text-xs text-purple-700 font-semibold">Completed Orders</p>
+                                <p class="text-xl md:text-2xl font-bold text-purple-800" id="completed-orders">0</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Training Completion Notifications -->
+                <div id="training-notifications" class="mb-4 md:mb-6"></div>
+
+                <!-- Recent Activity -->
+                <div class="card">
+                    <h3 class="text-lg font-bold mb-3 pb-2 border-b-2 border-gray-100">Recent Activity</h3>
+                    <div id="recent-activity" class="space-y-2"></div>
+                </div>
+            </div>
+
+            <!-- Drivers Page -->
+            <div id="drivers-page" class="page hidden">
+                <div class="bg-gradient-to-r from-purple-600 to-indigo-600 text-white p-4 md:p-6 rounded-xl mb-4 md:mb-6 shadow-lg">
+                    <div class="flex justify-between items-center flex-wrap gap-3">
+                        <div>
+                            <h2 class="text-2xl md:text-3xl font-bold mb-1">Driver Management</h2>
+                            <p class="text-sm md:text-base opacity-90">Manage all drivers</p>
+                        </div>
+                        <button onclick="openDriverModal()" class="btn btn-success">
+                            ➕ Add Driver
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Driver Stats -->
+                <div class="grid grid-cols-3 gap-3 md:gap-4 mb-4">
+                    <div class="card bg-gradient-to-br from-green-400 to-green-600 text-white">
+                        <p class="text-xs opacity-90">Active</p>
+                        <p class="text-2xl md:text-3xl font-bold" id="drivers-active">0</p>
+                    </div>
+                    <div class="card bg-gradient-to-br from-yellow-400 to-yellow-600 text-white">
+                        <p class="text-xs opacity-90">Training</p>
+                        <p class="text-2xl md:text-3xl font-bold" id="drivers-training">0</p>
+                    </div>
+                    <div class="card bg-gradient-to-br from-red-400 to-red-600 text-white">
+                        <p class="text-xs opacity-90">Suspended</p>
+                        <p class="text-2xl md:text-3xl font-bold" id="drivers-suspended">0</p>
+                    </div>
+                </div>
+
+                <!-- Search -->
+                <div class="card mb-4 bg-gradient-to-r from-blue-50 to-purple-50">
+                    <div class="flex items-center gap-2">
+                        <span class="text-lg">🔍</span>
+                        <input type="text" id="driver-search" placeholder="Search driver by name or phone..." class="input flex-1 bg-white" onkeyup="filterDrivers()">
+                    </div>
+                </div>
+
+                <!-- Drivers List -->
+                <div id="drivers-list" class="space-y-3"></div>
+            </div>
+
+            <!-- Companies Page -->
+            <div id="companies-page" class="page hidden">
+                <div class="bg-gradient-to-r from-purple-600 to-indigo-600 text-white p-4 md:p-6 rounded-xl mb-4 md:mb-6 shadow-lg">
+                    <div class="flex justify-between items-center flex-wrap gap-3">
+                        <div>
+                            <h2 class="text-2xl md:text-3xl font-bold mb-1">Company Management</h2>
+                            <p class="text-sm md:text-base opacity-90">Manage partner companies</p>
+                        </div>
+                        <button onclick="openCompanyModal()" class="btn btn-success">
+                            ➕ Add Company
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Companies List -->
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4" id="companies-list"></div>
+            </div>
+
+            <!-- Orders Page -->
+            <div id="orders-page" class="page hidden">
+                <div class="bg-gradient-to-r from-purple-600 to-indigo-600 text-white p-4 md:p-6 rounded-xl mb-4 md:mb-6 shadow-lg">
+                    <div class="flex justify-between items-center flex-wrap gap-3">
+                        <div>
+                            <h2 class="text-2xl md:text-3xl font-bold mb-1">Order Management</h2>
+                            <p class="text-sm md:text-base opacity-90">Track and manage all orders</p>
+                        </div>
+                        <button onclick="openOrderModal()" class="btn btn-success">
+                            ➕ New Order
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Order Stats -->
+                <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4 mb-4">
+                    <div class="card bg-gradient-to-br from-blue-400 to-blue-600 text-white">
+                        <p class="text-xs opacity-90">Total Orders</p>
+                        <p class="text-2xl md:text-3xl font-bold" id="orders-total">0</p>
+                    </div>
+                    <div class="card bg-gradient-to-br from-green-400 to-green-600 text-white">
+                        <p class="text-xs opacity-90">Completed</p>
+                        <p class="text-2xl md:text-3xl font-bold" id="orders-completed">0</p>
+                    </div>
+                    <div class="card bg-gradient-to-br from-yellow-400 to-yellow-600 text-white">
+                        <p class="text-xs opacity-90">In Progress</p>
+                        <p class="text-2xl md:text-3xl font-bold" id="orders-progress">0</p>
+                    </div>
+                    <div class="card bg-gradient-to-br from-purple-400 to-purple-600 text-white">
+                        <p class="text-xs opacity-90">Revenue</p>
+                        <p class="text-2xl md:text-3xl font-bold" id="orders-revenue">£0</p>
+                    </div>
+                </div>
+
+                <!-- Orders Table -->
+                <div class="card overflow-x-auto">
+                    <table class="w-full text-sm">
+                        <thead class="bg-gradient-to-r from-blue-500 to-purple-600 text-white">
+                            <tr>
+                                <th class="p-2 md:p-3 text-left font-bold">Order #</th>
+                                <th class="p-2 md:p-3 text-left font-bold">Date</th>
+                                <th class="p-2 md:p-3 text-left font-bold">Company</th>
+                                <th class="p-2 md:p-3 text-left font-bold">Driver</th>
+                                <th class="p-2 md:p-3 text-left font-bold">Revenue</th>
+                                <th class="p-2 md:p-3 text-left font-bold">Status</th>
+                                <th class="p-2 md:p-3 text-left font-bold">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="orders-list"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Salaries Page -->
+            <div id="salaries-page" class="page hidden">
+                <div class="bg-gradient-to-r from-purple-600 to-indigo-600 text-white p-4 md:p-6 rounded-xl mb-4 md:mb-6 shadow-lg">
+                    <div class="flex justify-between items-center flex-wrap gap-3">
+                        <div>
+                            <h2 class="text-2xl md:text-3xl font-bold mb-1">Salary Management</h2>
+                            <p class="text-sm md:text-base opacity-90">Calculate and manage driver salaries</p>
+                        </div>
+                        <button onclick="calculateWeeklySalaries()" class="btn btn-success">
+                            🧮 Calculate Salaries
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Salary Summary -->
+                <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4 mb-4">
+                    <div class="card bg-gradient-to-br from-indigo-400 to-indigo-600 text-white">
+                        <p class="text-xs opacity-90">Current Week</p>
+                        <p class="text-xl md:text-2xl font-bold">Week 51</p>
+                    </div>
+                    <div class="card bg-gradient-to-br from-green-400 to-green-600 text-white">
+                        <p class="text-xs opacity-90">Total Salaries</p>
+                        <p class="text-xl md:text-2xl font-bold" id="salaries-total">£0</p>
+                    </div>
+                    <div class="card bg-gradient-to-br from-yellow-400 to-yellow-600 text-white">
+                        <p class="text-xs opacity-90">Bonuses</p>
+                        <p class="text-xl md:text-2xl font-bold" id="salaries-bonus">£0</p>
+                    </div>
+                    <div class="card bg-gradient-to-br from-red-400 to-red-600 text-white">
+                        <p class="text-xs opacity-90">Deductions</p>
+                        <p class="text-xl md:text-2xl font-bold" id="salaries-deductions">£0</p>
+                    </div>
+                </div>
+
+                <!-- Salaries List -->
+                <div id="salaries-list" class="space-y-3"></div>
+            </div>
+
+            <!-- Reports Page -->
+            <div id="reports-page" class="page hidden">
+                <div class="bg-gradient-to-r from-purple-600 to-indigo-600 text-white p-4 md:p-6 rounded-xl mb-4 md:mb-6 shadow-lg">
+                    <h2 class="text-2xl md:text-3xl font-bold mb-1">Reports & Statistics</h2>
+                    <p class="text-sm md:text-base opacity-90">Detailed performance reports</p>
+                </div>
+                
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6">
+                    <!-- Daily Profit Report -->
+                    <div class="card bg-gradient-to-br from-blue-50 to-purple-50">
+                        <h3 class="text-xl font-bold mb-3 pb-2 border-b-2">Daily Profit Report</h3>
+                        <div class="space-y-3">
+                            <div class="flex justify-between items-center p-3 bg-white rounded-lg shadow">
+                                <span class="font-bold text-gray-700">Today's Orders:</span>
+                                <span class="text-xl font-bold text-blue-600" id="report-daily-orders">0</span>
+                            </div>
+                            <div class="flex justify-between items-center p-3 bg-white rounded-lg shadow">
+                                <span class="font-bold text-gray-700">Completed:</span>
+                                <span class="text-xl font-bold text-green-600" id="report-daily-completed">0</span>
+                            </div>
+                            <div class="flex justify-between items-center p-3 bg-white rounded-lg shadow">
+                                <span class="font-bold text-gray-700">Revenue:</span>
+                                <span class="text-xl font-bold text-purple-600" id="report-daily-revenue">£0</span>
+                            </div>
+                            <div class="flex justify-between items-center p-3 bg-white rounded-lg shadow">
+                                <span class="font-bold text-gray-700">Driver Costs:</span>
+                                <span class="text-xl font-bold text-orange-600" id="report-daily-costs">£0</span>
+                            </div>
+                            <div class="flex justify-between items-center p-3 bg-gradient-to-r from-green-400 to-green-600 text-white rounded-lg shadow-lg">
+                                <span class="font-bold">Net Daily Profit:</span>
+                                <span class="text-2xl font-bold" id="report-daily-profit">£0</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Weekly Report -->
+                    <div class="card bg-gradient-to-br from-green-50 to-blue-50">
+                        <h3 class="text-xl font-bold mb-3 pb-2 border-b-2">Weekly Report</h3>
+                        <div class="space-y-3">
+                            <div class="flex justify-between items-center p-3 bg-white rounded-lg shadow">
+                                <span class="font-bold text-gray-700">Total Revenue:</span>
+                                <span class="text-xl font-bold text-green-600" id="report-revenue">£0</span>
+                            </div>
+                            <div class="flex justify-between items-center p-3 bg-white rounded-lg shadow">
+                                <span class="font-bold text-gray-700">Total Salaries:</span>
+                                <span class="text-xl font-bold text-red-600" id="report-salaries">£0</span>
+                            </div>
+                            <div class="flex justify-between items-center p-3 bg-gradient-to-r from-green-400 to-green-600 text-white rounded-lg shadow-lg">
+                                <span class="font-bold">Net Profit:</span>
+                                <span class="text-2xl font-bold" id="report-profit">£0</span>
+                            </div>
+                        </div>
+                        <button onclick="downloadReport('weekly')" class="btn btn-primary w-full mt-4">
+                            📥 Download Report
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Driver Performance -->
+                <div class="card mt-4 md:mt-6 bg-gradient-to-br from-purple-50 to-pink-50">
+                    <h3 class="text-xl font-bold mb-3 pb-2 border-b-2">Driver Performance</h3>
+                    <div id="driver-performance" class="space-y-2"></div>
+                </div>
+            </div>
+
+            <!-- Settings Page -->
+            <div id="settings-page" class="page hidden">
+                <div class="bg-gradient-to-r from-purple-600 to-indigo-600 text-white p-4 md:p-6 rounded-xl mb-4 md:mb-6 shadow-lg">
+                    <h2 class="text-2xl md:text-3xl font-bold mb-1">Settings</h2>
+                    <p class="text-sm md:text-base opacity-90">System configuration and data management</p>
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
+                    <!-- Backup & Restore -->
+                    <div class="card">
+                        <h3 class="text-xl font-bold mb-4 pb-3 border-b-2">Backup & Restore</h3>
+                        <div class="space-y-3">
+                            <button onclick="exportData()" class="btn btn-success w-full">
+                                📤 Export All Data
+                            </button>
+                            <div>
+                                <label class="block text-sm font-bold mb-2 text-gray-700">Import Backup:</label>
+                                <input type="file" id="import-file" accept=".json" class="input">
+                                <button onclick="importData()" class="btn btn-primary w-full mt-2">
+                                    📥 Import Data
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- System Settings -->
+                    <div class="card">
+                        <h3 class="text-xl font-bold mb-4 pb-3 border-b-2">System Settings</h3>
+                        <div class="space-y-3">
+                            <div>
+                                <label class="block text-sm font-bold mb-2 text-gray-700">Training Period (Days):</label>
+                                <input type="number" id="training-days" class="input" value="15" min="1">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-bold mb-2 text-gray-700">Driver Cost per Order (£):</label>
+                                <input type="number" id="driver-cost-per-order" class="input" value="1.2" step="0.1">
+                            </div>
+                            <button onclick="saveSettings()" class="btn btn-primary w-full">
+                                💾 Save Settings
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Driver Modal -->
+    <div id="driver-modal" class="modal">
+        <div class="modal-content w-full max-w-3xl p-6 md:p-8">
+            <div class="flex justify-between items-center mb-4 md:mb-6 pb-3 md:pb-4 border-b-2">
+                <h2 class="text-xl md:text-2xl font-bold text-gray-800">
+                    <span id="driver-modal-title">➕ Add New Driver</span>
+                </h2>
+                <button onclick="closeDriverModal()" class="text-2xl md:text-3xl text-gray-500 hover:text-red-600 transition">×</button>
+            </div>
+            <form id="driver-form" onsubmit="saveDriver(event)">
+                <input type="hidden" id="driver-id">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
+                    <div>
+                        <label class="block text-sm font-bold mb-2 text-gray-700">Full Name *</label>
+                        <input type="text" id="driver-name" class="input" required placeholder="John Doe">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-bold mb-2 text-gray-700">Phone Number *</label>
+                        <input type="tel" id="driver-phone" class="input" required placeholder="+447700900123">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-bold mb-2 text-gray-700">Email</label>
+                        <input type="email" id="driver-email" class="input" placeholder="john@example.com">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-bold mb-2 text-gray-700">WhatsApp</label>
+                        <input type="tel" id="driver-whatsapp" class="input" placeholder="+447700900123">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-bold mb-2 text-gray-700">Start Date *</label>
+                        <input type="date" id="driver-start-date" class="input" required>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-bold mb-2 text-gray-700">Status *</label>
+                        <select id="driver-status" class="input" required>
+                            <option value="training">🎓 Training</option>
+                            <option value="active">✅ Active</option>
+                            <option value="suspended">⛔ Suspended</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-bold mb-2 text-gray-700">Base Salary (£) *</label>
+                        <input type="number" id="driver-salary" class="input" required value="120" min="0" step="0.01">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-bold mb-2 text-gray-700">Required Orders/Week *</label>
+                        <input type="number" id="driver-orders" class="input" required value="100" min="0">
+                    </div>
+                </div>
+                
+                <!-- Document Upload Section -->
+                <div class="mt-4">
+                    <label class="block text-sm font-bold mb-2 text-gray-700">Upload Documents (ID, Passport, etc.)</label>
+                    <input type="file" id="driver-documents" class="input" multiple accept="image/*" onchange="previewDocuments(event)">
+                    <div id="document-previews" class="flex flex-wrap gap-2 mt-2"></div>
+                </div>
+
+                <!-- Advances Section -->
+                <div class="mt-4">
+                    <label class="block text-sm font-bold mb-2 text-gray-700">Advance/Loan (£)</label>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                        <input type="number" id="driver-advance-amount" class="input" placeholder="Advance amount" min="0" step="0.01">
+                        <select id="driver-advance-type" class="input">
+                            <option value="">No Advance</option>
+                            <option value="full">Full Deduction</option>
+                            <option value="installment">Installment</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="mt-4">
+                    <label class="block text-sm font-bold mb-2 text-gray-700">Notes</label>
+                    <textarea id="driver-notes" class="input" rows="2" placeholder="Additional notes..."></textarea>
+                </div>
+                <div class="flex gap-2 md:gap-3 mt-4 md:mt-6">
+                    <button type="submit" class="btn btn-success flex-1">💾 Save</button>
+                    <button type="button" onclick="closeDriverModal()" class="btn btn-secondary flex-1">❌ Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Company Modal -->
+    <div id="company-modal" class="modal">
+        <div class="modal-content w-full max-w-2xl p-6 md:p-8">
+            <div class="flex justify-between items-center mb-4 md:mb-6 pb-3 md:pb-4 border-b-2">
+                <h2 class="text-xl md:text-2xl font-bold text-gray-800">
+                    <span id="company-modal-title">🏢 Add New Company</span>
+                </h2>
+                <button onclick="closeCompanyModal()" class="text-2xl md:text-3xl text-gray-500 hover:text-red-600 transition">×</button>
+            </div>
+            <form id="company-form" onsubmit="saveCompany(event)">
+                <input type="hidden" id="company-id">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
+                    <div>
+                        <label class="block text-sm font-bold mb-2 text-gray-700">Company Name *</label>
+                        <input type="text" id="company-name" class="input" required placeholder="Company A Ltd">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-bold mb-2 text-gray-700">Contact Person *</label>
+                        <input type="text" id="company-contact" class="input" required placeholder="Jane Doe">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-bold mb-2 text-gray-700">Phone Number *</label>
+                        <input type="tel" id="company-phone" class="input" required placeholder="+447700900888">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-bold mb-2 text-gray-700">Email *</label>
+                        <input type="email" id="company-email" class="input" required placeholder="contact@company.com">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-bold mb-2 text-gray-700">Status *</label>
+                        <select id="company-status" class="input" required>
+                            <option value="active">✅ Active</option>
+                            <option value="inactive">⏸️ Inactive</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="mt-4">
+                    <label class="block text-sm font-bold mb-2 text-gray-700">Notes</label>
+                    <textarea id="company-notes" class="input" rows="2" placeholder="Special instructions, delivery times, etc..."></textarea>
+                </div>
+                <div class="flex gap-2 md:gap-3 mt-4 md:mt-6">
+                    <button type="submit" class="btn btn-success flex-1">💾 Save</button>
+                    <button type="button" onclick="closeCompanyModal()" class="btn btn-secondary flex-1">❌ Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Order Modal -->
+    <div id="order-modal" class="modal">
+        <div class="modal-content w-full max-w-2xl p-6 md:p-8">
+            <div class="flex justify-between items-center mb-4 md:mb-6 pb-3 md:pb-4 border-b-2">
+                <h2 class="text-xl md:text-2xl font-bold text-gray-800">
+                    <span id="order-modal-title">📦 Add New Order</span>
+                </h2>
+                <button onclick="closeOrderModal()" class="text-2xl md:text-3xl text-gray-500 hover:text-red-600 transition">×</button>
+            </div>
+            <form id="order-form" onsubmit="saveOrder(event)">
+                <input type="hidden" id="order-id">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
+                    <div>
+                        <label class="block text-sm font-bold mb-2 text-gray-700">Company *</label>
+                        <select id="order-company" class="input" required>
+                            <option value="">-- Select Company --</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-bold mb-2 text-gray-700">Driver *</label>
+                        <select id="order-driver" class="input" required>
+                            <option value="">-- Select Driver --</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-bold mb-2 text-gray-700">Date *</label>
+                        <input type="date" id="order-date" class="input" required>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-bold mb-2 text-gray-700">Postcode</label>
+                        <input type="text" id="order-postcode" class="input" placeholder="SW1A 1AA">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-bold mb-2 text-gray-700">Customer Name</label>
+                        <input type="text" id="order-customer" class="input" placeholder="John Smith">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-bold mb-2 text-gray-700">Customer Phone</label>
+                        <input type="tel" id="order-customer-phone" class="input" placeholder="+447700900001">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-bold mb-2 text-gray-700">Revenue (£) *</label>
+                        <input type="number" id="order-revenue" class="input" required min="0" step="0.01" placeholder="15.00">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-bold mb-2 text-gray-700">Status *</label>
+                        <select id="order-status" class="input" required>
+                            <option value="pending">⏳ Pending</option>
+                            <option value="in_progress">🔄 In Progress</option>
+                            <option value="completed">✅ Completed</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="mt-4">
+                    <label class="block text-sm font-bold mb-2 text-gray-700">Notes</label>
+                    <textarea id="order-notes" class="input" rows="2" placeholder="Additional notes..."></textarea>
+                </div>
+                <div class="flex gap-2 md:gap-3 mt-4 md:mt-6">
+                    <button type="submit" class="btn btn-success flex-1">💾 Save</button>
+                    <button type="button" onclick="closeOrderModal()" class="btn btn-secondary flex-1">❌ Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Data Storage
+        let drivers = JSON.parse(localStorage.getItem('drivers_v2') || '[]');
+        let companies = JSON.parse(localStorage.getItem('companies_v2') || '[]');
+        let orders = JSON.parse(localStorage.getItem('orders_v2') || '[]');
+        let salaries = JSON.parse(localStorage.getItem('salaries_v2') || '[]');
+        let settings = JSON.parse(localStorage.getItem('settings_v2') || '{"trainingDays": 15, "driverCostPerOrder": 1.2}');
+
+        // Initialize with sample data if empty
+        if (drivers.length === 0) {
+            drivers = [
+                {id: 1001, name: 'Ahmed Ali', phone: '+447700900123', email: 'ahmed@email.com', whatsapp: '+447700900123', startDate: '2024-01-15', status: 'active', salary: 120, requiredOrders: 100, notes: 'Excellent driver', documents: [], advances: []},
+                {id: 1002, name: 'Mohammed Hassan', phone: '+447700900124', email: 'mohammed@email.com', whatsapp: '+447700900124', startDate: '2024-12-10', status: 'training', salary: 120, requiredOrders: 100, notes: '', documents: [], advances: []},
+                {id: 1003, name: 'Khaled Ibrahim', phone: '+447700900125', email: 'khaled@email.com', whatsapp: '+447700900125', startDate: '2024-02-01', status: 'active', salary: 120, requiredOrders: 100, notes: 'Reliable', documents: [], advances: []}
+            ];
+            localStorage.setItem('drivers_v2', JSON.stringify(drivers));
+        }
+
+        if (companies.length === 0) {
+            companies = [
+                {id: 2001, name: 'Company A Ltd', contact: 'Jane Doe', phone: '+447700900888', email: 'jane@companya.com', status: 'active', notes: 'Always ring bell twice'},
+                {id: 2002, name: 'Express Delivery Co', contact: 'John Smith', phone: '+447700900777', email: 'john@express.com', status: 'active', notes: 'Call before delivery'}
+            ];
+            localStorage.setItem('companies_v2', JSON.stringify(companies));
+        }
+        
+        if (orders.length === 0) {
+            const today = new Date().toISOString().split('T')[0];
+            orders = [
+                {id: 3001, companyId: 2001, driverId: 1001, date: today, postcode: 'SW1A 1AA', customer: 'John Smith', phone: '+447700900001', revenue: 15, notes: '', status: 'completed'},
+                {id: 3002, companyId: 2002, driverId: 1001, date: today, postcode: 'SW1A 2AA', customer: 'Mary Johnson', phone: '+447700900002', revenue: 25, notes: '', status: 'completed'},
+                {id: 3003, companyId: 2001, driverId: 1003, date: today, postcode: 'W1A 1AA', customer: 'David Brown', phone: '+447700900003', revenue: 15, notes: '', status: 'in_progress'}
+            ];
+            localStorage.setItem('orders_v2', JSON.stringify(orders));
+        }
+
+        // Helper Functions
+        function formatCurrency(amount) {
+            return '£' + parseFloat(amount).toFixed(2);
+        }
+
+        function formatDate(dateStr) {
+            const date = new Date(dateStr);
+            return date.toLocaleDateString('en-GB');
+        }
+
+        function toggleSidebar() {
+            document.getElementById('sidebar').classList.toggle('open');
+        }
+
+        function showPage(pageName) {
+            document.querySelectorAll('.page').forEach(page => page.classList.add('hidden'));
+            document.getElementById(pageName + '-page').classList.remove('hidden');
+            
+            document.querySelectorAll('.nav-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            document.querySelector(`[data-page="${pageName}"]`).classList.add('active');
+            
+            if (pageName === 'dashboard') loadDashboard();
+            else if (pageName === 'drivers') loadDrivers();
+            else if (pageName === 'companies') loadCompanies();
+            else if (pageName === 'orders') loadOrders();
+            else if (pageName === 'salaries') loadSalaries();
+            else if (pageName === 'reports') loadReports();
+            else if (pageName === 'settings') loadSettings();
+
+            if (window.innerWidth < 768) {
+                document.getElementById('sidebar').classList.remove('open');
+            }
+        }
+
+        function showNotification(message, type = 'success') {
+            const notification = document.createElement('div');
+            notification.className = 'notification';
+            notification.innerHTML = `
+                <div class="flex items-center gap-3">
+                    <span class="text-2xl">${type === 'success' ? '✅' : '⚠️'}</span>
+                    <span class="font-semibold">${message}</span>
+                </div>
+            `;
+            document.body.appendChild(notification);
+            setTimeout(() => notification.remove(), 3000);
+        }
+
+        // Check training completion
+        function checkTrainingCompletion() {
+            const today = new Date();
+            const notifications = [];
+            
+            drivers.forEach(driver => {
+                if (driver.status === 'training') {
+                    const startDate = new Date(driver.startDate);
+                    const daysSinceStart = Math.floor((today - startDate) / (1000 * 60 * 60 * 24));
+                    
+                    if (daysSinceStart >= settings.trainingDays) {
+                        notifications.push({
+                            driverId: driver.id,
+                            driverName: driver.name,
+                            daysSinceStart: daysSinceStart
+                        });
+                    }
+                }
+            });
+            
+            const container = document.getElementById('training-notifications');
+            if (notifications.length > 0) {
+                container.innerHTML = notifications.map(notif => `
+                    <div class="card bg-gradient-to-r from-yellow-400 to-orange-500 text-white">
+                        <div class="flex items-center justify-between flex-wrap gap-3">
+                            <div>
+                                <p class="font-bold text-lg">🎓 Training Completed!</p>
+                                <p class="text-sm mt-1"><strong>${notif.driverName}</strong> has completed ${notif.daysSinceStart} days of training.</p>
+                            </div>
+                            <button onclick="confirmTrainingComplete(${notif.driverId})" class="btn btn-success">
+                                ✓ Activate Driver
+                            </button>
+                        </div>
+                    </div>
+                `).join('');
+            } else {
+                container.innerHTML = '';
+            }
+        }
+
+        function confirmTrainingComplete(driverId) {
+            const driver = drivers.find(d => d.id === driverId);
+            if (driver) {
+                driver.status = 'active';
+                localStorage.setItem('drivers_v2', JSON.stringify(drivers));
+                showNotification(`${driver.name} is now an active driver!`);
+                loadDashboard();
+                loadDrivers();
+            }
+        }
+
+        // Document preview function
+        function previewDocuments(event) {
+            const files = event.target.files;
+            const preview = document.getElementById('document-previews');
+            preview.innerHTML = '';
+            
+            for (let file of files) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const img = document.createElement('img');
+                    img.src = e.target.result;
+                    img.className = 'image-preview';
+                    preview.appendChild(img);
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        // Dashboard Functions
+        function loadDashboard() {
+            const totalRevenue = orders.reduce((sum, o) => sum + parseFloat(o.revenue), 0);
+            const totalSalaries = salaries.reduce((sum, s) => sum + parseFloat(s.finalSalary || 0), 0);
+            const netProfit = totalRevenue - totalSalaries;
+            
+            document.getElementById('total-revenue').textContent = formatCurrency(totalRevenue);
+            document.getElementById('total-salaries').textContent = formatCurrency(totalSalaries);
+            document.getElementById('net-profit').textContent = formatCurrency(netProfit);
+            document.getElementById('total-orders').textContent = orders.length;
+            
+            document.getElementById('active-drivers').textContent = drivers.filter(d => d.status === 'active').length;
+            document.getElementById('training-drivers').textContent = drivers.filter(d => d.status === 'training').length;
+            document.getElementById('active-companies').textContent = companies.filter(c => c.status === 'active').length;
+            document.getElementById('completed-orders').textContent = orders.filter(o => o.status === 'completed').length;
+
+            checkTrainingCompletion();
+            loadRecentActivity();
+        }
+
+        function loadRecentActivity() {
+            const container = document.getElementById('recent-activity');
+            const recent = orders.slice(-5).reverse();
+            
+            if (recent.length === 0) {
+                container.innerHTML = '<p class="text-center text-gray-500 py-6">No recent activities</p>';
+                return;
+            }
+            
+            container.innerHTML = recent.map(order => {
+                const driver = drivers.find(d => d.id == order.driverId);
+                const company = companies.find(c => c.id == order.companyId);
+                return `
+                    <div class="flex items-start gap-2 p-2.5 bg-gradient-to-r from-green-50 to-blue-50 rounded-lg border-l-4 border-green-500 hover:shadow-md transition">
+                        <span class="text-green-500 text-lg">✓</span>
+                        <div class="flex-1 text-sm">
+                            <p class="font-semibold text-gray-800">Order from ${company?.name || 'Company'} assigned to ${driver?.name || 'Driver'}</p>
+                            <p class="text-xs text-gray-500 mt-0.5">📅 ${formatDate(order.date)} | 💰 ${formatCurrency(order.revenue)}</p>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // Continue with remaining functions...
+        // (Driver, Company, Order, Salary, Report functions will be in next part due to character limit)
+
+        // Initialize
+        showPage('dashboard');
+        
+        // Load settings
+        document.getElementById('training-days').value = settings.trainingDays;
+        document.getElementById('driver-cost-per-order').value = settings.driverCostPerOrder;
+    </script>
+</body>
+</html>
+
+        // Driver Functions
+        function loadDrivers() {
+            document.getElementById('drivers-active').textContent = drivers.filter(d => d.status === 'active').length;
+            document.getElementById('drivers-training').textContent = drivers.filter(d => d.status === 'training').length;
+            document.getElementById('drivers-suspended').textContent = drivers.filter(d => d.status === 'suspended').length;
+            renderDrivers();
+        }
+
+        function renderDrivers(filteredDrivers = drivers) {
+            const container = document.getElementById('drivers-list');
+            
+            if (filteredDrivers.length === 0) {
+                container.innerHTML = '<p class="text-center text-gray-500 py-6 card">No drivers found</p>';
+                return;
+            }
+            
+            container.innerHTML = filteredDrivers.map(driver => {
+                const hasAdvances = driver.advances && driver.advances.length > 0;
+                const totalAdvance = hasAdvances ? driver.advances.reduce((sum, adv) => sum + parseFloat(adv.amount || 0), 0) : 0;
+                
+                return `
+                    <div class="card border-2 border-gray-100 hover:shadow-xl transition-all hover:border-blue-300 bg-gradient-to-r from-white to-gray-50">
+                        <div class="flex items-center justify-between flex-wrap gap-3">
+                            <div class="flex-1">
+                                <h3 class="font-bold text-lg text-gray-800 mb-2">${driver.name}</h3>
+                                <div class="grid grid-cols-2 gap-2 text-sm">
+                                    <p class="text-gray-600">📱 ${driver.phone}</p>
+                                    <p class="text-gray-600">📧 ${driver.email || 'N/A'}</p>
+                                    <p class="text-gray-600">📅 ${formatDate(driver.startDate)}</p>
+                                    <p class="text-gray-600">💰 ${formatCurrency(driver.salary)}</p>
+                                    <p class="text-gray-600">📦 ${driver.requiredOrders} orders/week</p>
+                                    ${hasAdvances ? `<p class="text-orange-600 font-semibold">💳 Advance: ${formatCurrency(totalAdvance)}</p>` : ''}
+                                </div>
+                                ${driver.documents && driver.documents.length > 0 ? `
+                                    <div class="mt-2 flex flex-wrap gap-1">
+                                        ${driver.documents.slice(0, 3).map(doc => `
+                                            <img src="${doc}" class="w-12 h-12 object-cover rounded border-2 border-gray-300" alt="Document">
+                                        `).join('')}
+                                        ${driver.documents.length > 3 ? `<span class="text-xs text-gray-500 self-center">+${driver.documents.length - 3} more</span>` : ''}
+                                    </div>
+                                ` : ''}
+                            </div>
+                            <div class="text-right space-y-2">
+                                <span class="badge ${driver.status === 'active' ? 'badge-success' : driver.status === 'training' ? 'badge-warning' : 'badge-danger'} text-xs">
+                                    ${driver.status === 'active' ? '✅ Active' : driver.status === 'training' ? '🎓 Training' : '⛔ Suspended'}
+                                </span>
+                                <div class="flex gap-2">
+                                    <button onclick="editDriver(${driver.id})" class="p-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition text-sm">✏️</button>
+                                    <button onclick="deleteDriver(${driver.id})" class="p-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition text-sm">🗑️</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function filterDrivers() {
+            const search = document.getElementById('driver-search').value.toLowerCase();
+            const filtered = drivers.filter(d => 
+                d.name.toLowerCase().includes(search) || 
+                d.phone.includes(search)
+            );
+            renderDrivers(filtered);
+        }
+
+        function openDriverModal(driverId = null) {
+            const modal = document.getElementById('driver-modal');
+            const form = document.getElementById('driver-form');
+            form.reset();
+            document.getElementById('document-previews').innerHTML = '';
+            
+            if (driverId) {
+                const driver = drivers.find(d => d.id === driverId);
+                if (driver) {
+                    document.getElementById('driver-modal-title').textContent = '✏️ Edit Driver';
+                    document.getElementById('driver-id').value = driver.id;
+                    document.getElementById('driver-name').value = driver.name;
+                    document.getElementById('driver-phone').value = driver.phone;
+                    document.getElementById('driver-email').value = driver.email || '';
+                    document.getElementById('driver-whatsapp').value = driver.whatsapp || driver.phone;
+                    document.getElementById('driver-start-date').value = driver.startDate;
+                    document.getElementById('driver-status').value = driver.status;
+                    document.getElementById('driver-salary').value = driver.salary;
+                    document.getElementById('driver-orders').value = driver.requiredOrders;
+                    document.getElementById('driver-notes').value = driver.notes || '';
+                    
+                    if (driver.documents && driver.documents.length > 0) {
+                        const preview = document.getElementById('document-previews');
+                        driver.documents.forEach(doc => {
+                            const img = document.createElement('img');
+                            img.src = doc;
+                            img.className = 'image-preview';
+                            preview.appendChild(img);
+                        });
+                    }
+                }
+            } else {
+                document.getElementById('driver-modal-title').textContent = '➕ Add New Driver';
+                const today = new Date().toISOString().split('T')[0];
+                document.getElementById('driver-start-date').value = today;
+            }
+            
+            modal.classList.add('active');
+        }
+
+        function closeDriverModal() {
+            document.getElementById('driver-modal').classList.remove('active');
+        }
+
+        function saveDriver(event) {
+            event.preventDefault();
+            
+            const id = document.getElementById('driver-id').value;
+            const files = document.getElementById('driver-documents').files;
+            const documents = [];
+            
+            // Convert uploaded files to base64
+            const filePromises = Array.from(files).map(file => {
+                return new Promise((resolve) => {
+                    const reader = new FileReader();
+                    reader.onload = (e) => resolve(e.target.result);
+                    reader.readAsDataURL(file);
+                });
+            });
+            
+            Promise.all(filePromises).then(results => {
+                documents.push(...results);
+                
+                const driverData = {
+                    id: id ? parseInt(id) : Date.now(),
+                    name: document.getElementById('driver-name').value,
+                    phone: document.getElementById('driver-phone').value,
+                    email: document.getElementById('driver-email').value,
+                    whatsapp: document.getElementById('driver-whatsapp').value || document.getElementById('driver-phone').value,
+                    startDate: document.getElementById('driver-start-date').value,
+                    status: document.getElementById('driver-status').value,
+                    salary: parseFloat(document.getElementById('driver-salary').value),
+                    requiredOrders: parseInt(document.getElementById('driver-orders').value),
+                    notes: document.getElementById('driver-notes').value,
+                    documents: id ? [...(drivers.find(d => d.id === parseInt(id))?.documents || []), ...documents] : documents,
+                    advances: id ? (drivers.find(d => d.id === parseInt(id))?.advances || []) : []
+                };
+                
+                // Handle advance
+                const advanceAmount = parseFloat(document.getElementById('driver-advance-amount').value) || 0;
+                const advanceType = document.getElementById('driver-advance-type').value;
+                
+                if (advanceAmount > 0 && advanceType) {
+                    driverData.advances.push({
+                        amount: advanceAmount,
+                        type: advanceType,
+                        date: new Date().toISOString().split('T')[0],
+                        remaining: advanceAmount
+                    });
+                }
+                
+                if (id) {
+                    const index = drivers.findIndex(d => d.id === parseInt(id));
+                    drivers[index] = driverData;
+                } else {
+                    drivers.push(driverData);
+                }
+                
+                localStorage.setItem('drivers_v2', JSON.stringify(drivers));
+                closeDriverModal();
+                loadDrivers();
+                showNotification('Driver saved successfully!');
+            });
+        }
+
+        function editDriver(id) {
+            openDriverModal(id);
+        }
+
+        function deleteDriver(id) {
+            if (confirm('Are you sure you want to delete this driver?')) {
+                drivers = drivers.filter(d => d.id !== id);
+                localStorage.setItem('drivers_v2', JSON.stringify(drivers));
+                loadDrivers();
+                showNotification('Driver deleted successfully!');
+            }
+        }
+
+        // Company Functions
+        function loadCompanies() {
+            const container = document.getElementById('companies-list');
+            
+            container.innerHTML = companies.map(company => `
+                <div class="card bg-gradient-to-br from-white to-blue-50 border-2 border-blue-100 hover:shadow-2xl transition-all">
+                    <div class="flex items-start justify-between mb-3">
+                        <div>
+                            <h3 class="font-bold text-lg text-gray-800">${company.name}</h3>
+                            <p class="text-sm text-gray-600 mt-1">👤 ${company.contact}</p>
+                        </div>
+                        <span class="badge ${company.status === 'active' ? 'badge-success' : 'badge-warning'} text-xs">
+                            ${company.status === 'active' ? '✅ Active' : '⏸️ Inactive'}
+                        </span>
+                    </div>
+                    <div class="space-y-1.5 mb-3 bg-white p-2.5 rounded-lg text-sm">
+                        <p>📧 ${company.email}</p>
+                        <p>📱 ${company.phone}</p>
+                        <p class="text-xs text-gray-500 mt-2">${company.notes || 'No notes'}</p>
+                    </div>
+                    <div class="flex gap-2">
+                        <button onclick="editCompany(${company.id})" class="btn btn-primary flex-1 text-sm">✏️ Edit</button>
+                        <button onclick="deleteCompany(${company.id})" class="btn btn-danger flex-1 text-sm">🗑️ Delete</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function openCompanyModal(companyId = null) {
+            const modal = document.getElementById('company-modal');
+            const form = document.getElementById('company-form');
+            form.reset();
+            
+            if (companyId) {
+                const company = companies.find(c => c.id === companyId);
+                if (company) {
+                    document.getElementById('company-modal-title').textContent = '✏️ Edit Company';
+                    document.getElementById('company-id').value = company.id;
+                    document.getElementById('company-name').value = company.name;
+                    document.getElementById('company-contact').value = company.contact;
+                    document.getElementById('company-phone').value = company.phone;
+                    document.getElementById('company-email').value = company.email;
+                    document.getElementById('company-status').value = company.status;
+                    document.getElementById('company-notes').value = company.notes || '';
+                }
+            } else {
+                document.getElementById('company-modal-title').textContent = '🏢 Add New Company';
+            }
+            
+            modal.classList.add('active');
+        }
+
+        function closeCompanyModal() {
+            document.getElementById('company-modal').classList.remove('active');
+        }
+
+        function saveCompany(event) {
+            event.preventDefault();
+            
+            const id = document.getElementById('company-id').value;
+            const companyData = {
+                id: id ? parseInt(id) : Date.now(),
+                name: document.getElementById('company-name').value,
+                contact: document.getElementById('company-contact').value,
+                phone: document.getElementById('company-phone').value,
+                email: document.getElementById('company-email').value,
+                status: document.getElementById('company-status').value,
+                notes: document.getElementById('company-notes').value
+            };
+            
+            if (id) {
+                const index = companies.findIndex(c => c.id === parseInt(id));
+                companies[index] = companyData;
+            } else {
+                companies.push(companyData);
+            }
+            
+            localStorage.setItem('companies_v2', JSON.stringify(companies));
+            closeCompanyModal();
+            loadCompanies();
+            showNotification('Company saved successfully!');
+        }
+
+        function editCompany(id) {
+            openCompanyModal(id);
+        }
+
+        function deleteCompany(id) {
+            if (confirm('Are you sure you want to delete this company?')) {
+                companies = companies.filter(c => c.id !== id);
+                localStorage.setItem('companies_v2', JSON.stringify(companies));
+                loadCompanies();
+                showNotification('Company deleted successfully!');
+            }
+        }
+
+        // Order Functions
+        function loadOrders() {
+            document.getElementById('orders-total').textContent = orders.length;
+            document.getElementById('orders-completed').textContent = orders.filter(o => o.status === 'completed').length;
+            document.getElementById('orders-progress').textContent = orders.filter(o => o.status === 'in_progress').length;
+            document.getElementById('orders-revenue').textContent = formatCurrency(orders.reduce((sum, o) => sum + parseFloat(o.revenue), 0));
+            
+            renderOrders();
+        }
+
+        function renderOrders() {
+            const container = document.getElementById('orders-list');
+            
+            if (orders.length === 0) {
+                container.innerHTML = '<tr><td colspan="7" class="text-center py-6 text-gray-500">No orders found</td></tr>';
+                return;
+            }
+            
+            container.innerHTML = orders.map((order, index) => {
+                const company = companies.find(c => c.id == order.companyId);
+                const driver = drivers.find(d => d.id == order.driverId);
+                const bgColor = index % 2 === 0 ? 'bg-white' : 'bg-gray-50';
+                return `
+                    <tr class="table-row ${bgColor} border-b border-gray-200 hover:bg-blue-50">
+                        <td class="p-2 md:p-3 font-bold text-blue-600 text-sm">#${order.id}</td>
+                        <td class="p-2 md:p-3 text-sm">${formatDate(order.date)}</td>
+                        <td class="p-2 md:p-3 font-semibold text-sm">${company?.name || '-'}</td>
+                        <td class="p-2 md:p-3 font-semibold text-sm">${driver?.name || '-'}</td>
+                        <td class="p-2 md:p-3 font-bold text-green-600 text-sm">${formatCurrency(order.revenue)}</td>
+                        <td class="p-2 md:p-3">
+                            <span class="badge ${order.status === 'completed' ? 'badge-success' : order.status === 'in_progress' ? 'badge-info' : 'badge-warning'}">
+                                ${order.status === 'completed' ? '✅ Done' : order.status === 'in_progress' ? '🔄 Progress' : '⏳ Pending'}
+                            </span>
+                        </td>
+                        <td class="p-2 md:p-3">
+                            <div class="flex gap-1">
+                                <button onclick="editOrder(${order.id})" class="p-1.5 bg-blue-500 text-white rounded hover:bg-blue-600 transition text-xs">✏️</button>
+                                <button onclick="updateOrderStatus(${order.id})" class="p-1.5 bg-green-500 text-white rounded hover:bg-green-600 transition text-xs">✓</button>
+                                <button onclick="deleteOrder(${order.id})" class="p-1.5 bg-red-500 text-white rounded hover:bg-red-600 transition text-xs">🗑️</button>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        function openOrderModal(orderId = null) {
+            const modal = document.getElementById('order-modal');
+            const form = document.getElementById('order-form');
+            form.reset();
+            
+            const companySelect = document.getElementById('order-company');
+            companySelect.innerHTML = '<option value="">-- Select Company --</option>' + 
+                companies.filter(c => c.status === 'active').map(c => 
+                    `<option value="${c.id}">${c.name}</option>`
+                ).join('');
+            
+            const driverSelect = document.getElementById('order-driver');
+            driverSelect.innerHTML = '<option value="">-- Select Driver --</option>' + 
+                drivers.filter(d => d.status === 'active' || d.status === 'training').map(d => 
+                    `<option value="${d.id}">${d.name}</option>`
+                ).join('');
+            
+            if (orderId) {
+                const order = orders.find(o => o.id === orderId);
+                if (order) {
+                    document.getElementById('order-modal-title').textContent = '✏️ Edit Order';
+                    document.getElementById('order-id').value = order.id;
+                    document.getElementById('order-company').value = order.companyId;
+                    document.getElementById('order-driver').value = order.driverId;
+                    document.getElementById('order-date').value = order.date;
+                    document.getElementById('order-postcode').value = order.postcode || '';
+                    document.getElementById('order-customer').value = order.customer || '';
+                    document.getElementById('order-customer-phone').value = order.phone || '';
+                    document.getElementById('order-revenue').value = order.revenue;
+                    document.getElementById('order-status').value = order.status;
+                    document.getElementById('order-notes').value = order.notes || '';
+                }
+            } else {
+                document.getElementById('order-modal-title').textContent = '📦 Add New Order';
+                const today = new Date().toISOString().split('T')[0];
+                document.getElementById('order-date').value = today;
+            }
+            
+            modal.classList.add('active');
+        }
+
+        function closeOrderModal() {
+            document.getElementById('order-modal').classList.remove('active');
+        }
+
+        function saveOrder(event) {
+            event.preventDefault();
+            
+            const id = document.getElementById('order-id').value;
+            const orderData = {
+                id: id ? parseInt(id) : Date.now(),
+                companyId: parseInt(document.getElementById('order-company').value),
+                driverId: parseInt(document.getElementById('order-driver').value),
+                date: document.getElementById('order-date').value,
+                postcode: document.getElementById('order-postcode').value,
+                customer: document.getElementById('order-customer').value,
+                phone: document.getElementById('order-customer-phone').value,
+                revenue: parseFloat(document.getElementById('order-revenue').value),
+                status: document.getElementById('order-status').value,
+                notes: document.getElementById('order-notes').value
+            };
+            
+            if (id) {
+                const index = orders.findIndex(o => o.id === parseInt(id));
+                orders[index] = orderData;
+            } else {
+                orders.push(orderData);
+            }
+            
+            localStorage.setItem('orders_v2', JSON.stringify(orders));
+            closeOrderModal();
+            loadOrders();
+            loadDashboard();
+            showNotification('Order saved successfully!');
+        }
+
+        function editOrder(id) {
+            openOrderModal(id);
+        }
+
+        function updateOrderStatus(id) {
+            const order = orders.find(o => o.id === id);
+            if (order.status === 'pending') order.status = 'in_progress';
+            else if (order.status === 'in_progress') order.status = 'completed';
+            
+            localStorage.setItem('orders_v2', JSON.stringify(orders));
+            loadOrders();
+            showNotification('Order status updated!');
+        }
+
+        function deleteOrder(id) {
+            if (confirm('Are you sure you want to delete this order?')) {
+                orders = orders.filter(o => o.id !== id);
+                localStorage.setItem('orders_v2', JSON.stringify(orders));
+                loadOrders();
+                showNotification('Order deleted successfully!');
+            }
+        }
+
+        // Salary Functions
+        function loadSalaries() {
+            const totalSalaries = salaries.reduce((sum, s) => sum + parseFloat(s.finalSalary || 0), 0);
+            const totalBonus = salaries.reduce((sum, s) => sum + parseFloat(s.bonus || 0), 0);
+            const totalDeductions = salaries.reduce((sum, s) => sum + parseFloat(s.deductions || 0), 0);
+            
+            document.getElementById('salaries-total').textContent = formatCurrency(totalSalaries);
+            document.getElementById('salaries-bonus').textContent = formatCurrency(totalBonus);
+            document.getElementById('salaries-deductions').textContent = formatCurrency(totalDeductions);
+            
+            renderSalaries();
+        }
+
+        function renderSalaries() {
+            const container = document.getElementById('salaries-list');
+            
+            if (salaries.length === 0) {
+                container.innerHTML = '<p class="text-center text-gray-500 py-6 card">No salaries calculated. Click "Calculate Salaries" to start.</p>';
+                return;
+            }
+            
+            container.innerHTML = salaries.map(salary => {
+                const driver = drivers.find(d => d.id == salary.driverId);
+                return `
+                    <div class="card border-2 border-gray-100 bg-gradient-to-r from-white to-green-50 hover:shadow-lg transition">
+                        <div class="flex items-center justify-between mb-3 flex-wrap gap-2">
+                            <div>
+                                <h3 class="font-bold text-lg">${driver?.name || 'Driver'}</h3>
+                                <p class="text-sm text-gray-600">Week ${salary.week}</p>
+                            </div>
+                            <span class="badge badge-success text-xs">${salary.status === 'paid' ? '✅ Paid' : '⏳ Pending'}</span>
+                        </div>
+                        <div class="grid grid-cols-2 md:grid-cols-4 gap-3 text-center bg-white p-3 rounded-lg text-sm">
+                            <div>
+                                <p class="text-xs text-gray-600 mb-1">Orders</p>
+                                <p class="font-bold text-base">${salary.totalOrders}</p>
+                            </div>
+                            <div>
+                                <p class="text-xs text-gray-600 mb-1">Base Salary</p>
+                                <p class="font-bold text-base">${formatCurrency(salary.baseSalary)}</p>
+                            </div>
+                            <div>
+                                <p class="text-xs text-gray-600 mb-1">Bonus</p>
+                                <p class="font-bold text-base text-green-600">${formatCurrency(salary.bonus)}</p>
+                            </div>
+                            <div>
+                                <p class="text-xs text-gray-600 mb-1">Final Salary</p>
+                                <p class="font-bold text-lg text-blue-600">${formatCurrency(salary.finalSalary)}</p>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function calculateWeeklySalaries() {
+            if (!confirm('Calculate salaries for all drivers for the current week?')) return;
+            
+            const currentWeek = 51;
+            salaries = [];
+            
+            drivers.forEach(driver => {
+                const driverOrders = orders.filter(o => o.driverId == driver.id).length;
+                
+                const startDate = new Date(driver.startDate);
+                const now = new Date();
+                const diffDays = Math.floor((now - startDate) / (1000 * 60 * 60 * 24));
+                const isTraining = diffDays <= settings.trainingDays;
+                
+                let baseSalary = 0;
+                let bonus = 0;
+                let finalSalary = 0;
+                
+                if (isTraining) {
+                    baseSalary = 0;
+                    bonus = 0;
+                    finalSalary = 0;
+                } else if (driverOrders < driver.requiredOrders) {
+                    baseSalary = 0;
+                    bonus = 0;
+                    finalSalary = 0;
+                } else if (driverOrders >= driver.requiredOrders) {
+                    baseSalary = driver.salary;
+                    if (driverOrders > driver.requiredOrders) {
+                        bonus = driverOrders - driver.requiredOrders;
+                    }
+                    finalSalary = baseSalary + bonus;
+                }
+                
+                let deductions = 0;
+                if (driver.advances && driver.advances.length > 0) {
+                    driver.advances.forEach(advance => {
+                        if (advance.type === 'installment') {
+                            deductions += parseFloat(advance.amount || 0) / 4;
+                        } else {
+                            deductions += parseFloat(advance.remaining || advance.amount || 0);
+                        }
+                    });
+                }
+                
+                finalSalary = Math.max(0, finalSalary - deductions);
+                
+                salaries.push({
+                    id: Date.now() + driver.id,
+                    driverId: driver.id,
+                    week: currentWeek,
+                    totalOrders: driverOrders,
+                    requiredOrders: driver.requiredOrders,
+                    baseSalary: baseSalary,
+                    bonus: bonus,
+                    deductions: deductions,
+                    finalSalary: finalSalary,
+                    isTraining: isTraining,
+                    status: 'pending'
+                });
+            });
+            
+            localStorage.setItem('salaries_v2', JSON.stringify(salaries));
+            loadSalaries();
+            showNotification('Salaries calculated successfully!');
+        }
+
+        // Reports Functions
+        function loadReports() {
+            const today = new Date().toISOString().split('T')[0];
+            const todayOrders = orders.filter(o => o.date === today);
+            const todayCompleted = todayOrders.filter(o => o.status === 'completed');
+            const todayRevenue = todayCompleted.reduce((sum, o) => sum + parseFloat(o.revenue), 0);
+            const todayCosts = todayCompleted.length * settings.driverCostPerOrder;
+            const todayProfit = todayRevenue - todayCosts;
+            
+            document.getElementById('report-daily-orders').textContent = todayOrders.length;
+            document.getElementById('report-daily-completed').textContent = todayCompleted.length;
+            document.getElementById('report-daily-revenue').textContent = formatCurrency(todayRevenue);
+            document.getElementById('report-daily-costs').textContent = formatCurrency(todayCosts);
+            document.getElementById('report-daily-profit').textContent = formatCurrency(todayProfit);
+            
+            const totalRevenue = orders.reduce((sum, o) => sum + parseFloat(o.revenue), 0);
+            const totalSalaries = salaries.reduce((sum, s) => sum + parseFloat(s.finalSalary || 0), 0);
+            const netProfit = totalRevenue - totalSalaries;
+            
+            document.getElementById('report-revenue').textContent = formatCurrency(totalRevenue);
+            document.getElementById('report-salaries').textContent = formatCurrency(totalSalaries);
+            document.getElementById('report-profit').textContent = formatCurrency(netProfit);
+            
+            const container = document.getElementById('driver-performance');
+            const driverStats = drivers.map(driver => {
+                const driverOrders = orders.filter(o => o.driverId == driver.id).length;
+                return { driver, orders: driverOrders };
+            }).sort((a, b) => b.orders - a.orders);
+            
+            container.innerHTML = driverStats.map((stat, index) => `
+                <div class="flex items-center justify-between p-3 ${index < 3 ? 'bg-gradient-to-r from-yellow-100 to-yellow-200' : 'bg-white'} rounded-lg shadow border-2 ${index < 3 ? 'border-yellow-400' : 'border-gray-200'} hover:shadow-lg transition">
+                    <div class="flex items-center gap-2">
+                        <span class="text-lg font-bold ${index < 3 ? 'text-yellow-600' : 'text-gray-600'}">${index + 1}</span>
+                        <span class="font-semibold text-sm text-gray-800">${stat.driver.name}</span>
+                    </div>
+                    <span class="font-bold text-base ${index < 3 ? 'text-yellow-700' : 'text-gray-700'}">${stat.orders} orders</span>
+                </div>
+            `).join('');
+        }
+
+        function downloadReport(type) {
+            const totalRevenue = orders.reduce((sum, o) => sum + parseFloat(o.revenue), 0);
+            const totalSalaries = salaries.reduce((sum, s) => sum + parseFloat(s.finalSalary || 0), 0);
+            const netProfit = totalRevenue - totalSalaries;
+            
+            let reportContent = `${type === 'weekly' ? 'Weekly' : 'Monthly'} Report\n\n`;
+            reportContent += `=================================\n`;
+            reportContent += `Total Revenue: ${formatCurrency(totalRevenue)}\n`;
+            reportContent += `Total Salaries: ${formatCurrency(totalSalaries)}\n`;
+            reportContent += `Net Profit: ${formatCurrency(netProfit)}\n`;
+            reportContent += `=================================\n\n`;
+            
+            reportContent += `Driver Details:\n`;
+            drivers.forEach(driver => {
+                const driverOrders = orders.filter(o => o.driverId == driver.id).length;
+                const driverRevenue = orders.filter(o => o.driverId == driver.id).reduce((sum, o) => sum + parseFloat(o.revenue), 0);
+                reportContent += `- ${driver.name}: ${driverOrders} orders, Revenue: ${formatCurrency(driverRevenue)}\n`;
+            });
+            
+            const blob = new Blob([reportContent], { type: 'text/plain;charset=utf-8' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `report_${type}_${new Date().toISOString().split('T')[0]}.txt`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            window.URL.revokeObjectURL(url);
+        }
+
+        // Settings Functions
+        function loadSettings() {
+            document.getElementById('training-days').value = settings.trainingDays;
+            document.getElementById('driver-cost-per-order').value = settings.driverCostPerOrder;
+        }
+
+        function saveSettings() {
+            settings.trainingDays = parseInt(document.getElementById('training-days').value);
+            settings.driverCostPerOrder = parseFloat(document.getElementById('driver-cost-per-order').value);
+            localStorage.setItem('settings_v2', JSON.stringify(settings));
+            showNotification('Settings saved successfully!');
+        }
+
+        function exportData() {
+            const data = {
+                drivers: drivers,
+                companies: companies,
+                orders: orders,
+                salaries: salaries,
+                settings: settings,
+                exportDate: new Date().toISOString()
+            };
+            
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `dms_backup_${new Date().toISOString().split('T')[0]}.json`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            window.URL.revokeObjectURL(url);
+            showNotification('Data exported successfully!');
+        }
+
+        function importData() {
+            const fileInput = document.getElementById('import-file');
+            const file = fileInput.files[0];
+            
+            if (!file) {
+                alert('Please select a file to import');
+                return;
+            }
+            
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const data = JSON.parse(e.target.result);
+                    
+                    if (confirm('This will replace all current data. Are you sure?')) {
+                        drivers = data.drivers || [];
+                        companies = data.companies || [];
+                        orders = data.orders || [];
+                        salaries = data.salaries || [];
+                        settings = data.settings || {trainingDays: 15, driverCostPerOrder: 1.2};
+                        
+                        localStorage.setItem('drivers_v2', JSON.stringify(drivers));
+                        localStorage.setItem('companies_v2', JSON.stringify(companies));
+                        localStorage.setItem('orders_v2', JSON.stringify(orders));
+                        localStorage.setItem('salaries_v2', JSON.stringify(salaries));
+                        localStorage.setItem('settings_v2', JSON.stringify(settings));
+                        
+                        showNotification('Data imported successfully!');
+                        showPage('dashboard');
+                    }
+                } catch (error) {
+                    alert('Error importing data. Please check the file format.');
+                }
+            };
+            reader.readAsText(file);
+        }
+
+    </script>
+</body>
+</html>
