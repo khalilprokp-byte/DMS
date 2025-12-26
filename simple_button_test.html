@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Simple Button Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 40px;
+            background: #f0f0f0;
+        }
+        .test-box {
+            background: white;
+            padding: 30px;
+            margin: 20px 0;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        button {
+            padding: 15px 30px;
+            margin: 10px;
+            font-size: 16px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            color: white;
+            font-weight: bold;
+        }
+        .btn-primary { background: #3b82f6; }
+        .btn-secondary { background: #6b7280; }
+        button:hover { opacity: 0.8; }
+        .result {
+            margin-top: 20px;
+            padding: 15px;
+            background: #dcfce7;
+            border-radius: 8px;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <h1>🧪 Simple Button Test for Add Stop</h1>
+    
+    <div class="test-box">
+        <h2>Test 1: Direct onclick</h2>
+        <button class="btn-primary" onclick="alert('Button clicked!')">
+            ➕ Test Basic Click
+        </button>
+        <p>If alert appears, onclick works</p>
+    </div>
+
+    <div class="test-box">
+        <h2>Test 2: Call function</h2>
+        <button class="btn-primary" onclick="testFunction()">
+            ➕ Test Function Call
+        </button>
+        <div id="result1" class="result"></div>
+    </div>
+
+    <div class="test-box">
+        <h2>Test 3: Simulate Add Stop buttons</h2>
+        <button class="btn-primary" onclick="openStopModal('single')">
+            ➕ Add Stop
+        </button>
+        <button class="btn-secondary" onclick="openStopModal('many')">
+            ➕➕ Add Many Stops
+        </button>
+        <div id="result2" class="result"></div>
+    </div>
+
+    <div class="test-box">
+        <h2>Test 4: Check if function exists</h2>
+        <button class="btn-primary" onclick="checkFunction()">
+            🔍 Check openStopModal
+        </button>
+        <div id="result3" class="result"></div>
+    </div>
+
+    <script>
+        console.log('Test page loaded');
+
+        function testFunction() {
+            console.log('testFunction called!');
+            const result = document.getElementById('result1');
+            result.innerHTML = '✅ Function called successfully!';
+            result.style.display = 'block';
+        }
+
+        function openStopModal(type) {
+            console.log('🎯 openStopModal called with type:', type);
+            const result = document.getElementById('result2');
+            result.innerHTML = `✅ openStopModal called!<br>Type: <strong>${type}</strong>`;
+            result.style.display = 'block';
+            alert(`openStopModal called!\nType: ${type}`);
+        }
+
+        function checkFunction() {
+            console.log('Checking if openStopModal exists...');
+            const result = document.getElementById('result3');
+            const exists = typeof window.openStopModal === 'function';
+            result.innerHTML = exists ? 
+                '✅ openStopModal exists and is a function' : 
+                '❌ openStopModal does NOT exist';
+            result.style.display = 'block';
+            console.log('openStopModal type:', typeof window.openStopModal);
+        }
+
+        // Auto-check on load
+        console.log('Auto-checking openStopModal:', typeof window.openStopModal);
+    </script>
+</body>
+</html>
